@@ -1,42 +1,31 @@
 // vim: softtabstop=2 tabstop=2 tw=120
 
-
 #ifndef BUFFERED_PRINTER_H
 #define BUFFERED_PRINTER_H
 
+#include <Arduino.h>
+
+#include "settings.h"
+
 class BufferedPrinter : public Print {
-    
-    public:
+  
+  public:
 
-        BufferedPrinter(uint8_t* buffer, uint16_t buffer_size, Print& backend) :
-            buffer(buffer),
-            buffer_size(buffer_size),
-            idx(0),
-            backend(backend)
-        {}
+    BufferedPrinter(uint8_t* buffer, uint16_t buffer_size, Print& backend);
 
-        virtual size_t write(uint8_t value) {
-            if (idx == buffer_size) flush();
+    virtual size_t write(uint8_t value);
 
-            buffer[idx++] = value;
+    void flush();
 
-            return 1;
-        }
+  private:
 
-        void flush() {
-            backend.write(buffer, idx);
-            idx = 0;
-        }
+    BufferedPrinter(const BufferedPrinter&);
+    BufferedPrinter& operator=(const BufferedPrinter&);
 
-    private:
-
-        BufferedPrinter(const BufferedPrinter&);
-        BufferedPrinter& operator=(const BufferedPrinter&);
-
-        uint8_t* buffer;
-        uint16_t buffer_size;
-        uint16_t idx;
-        Print& backend;
+    uint8_t* buffer;
+    uint16_t buffer_size;
+    uint16_t idx;
+    Print& backend;
 };
 
 #endif // BUFFERED_PRINTER_H

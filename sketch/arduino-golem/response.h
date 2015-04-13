@@ -3,7 +3,9 @@
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
-#include "fixed_length_string.h"
+#include <Arduino.h>
+
+#include "settings.h"
 
 class Response {
   public:
@@ -15,28 +17,21 @@ class Response {
 class BadRequestResponse: public Response {
   public:
 
-    virtual void Send(Print& sink) {
-      sink.print(F("HTTP/1.1 400 BAD REQUEST\r\n\r\n"));
-      sink.print(F("<html><head><title>Page not found!</title></head><body>Page not found!</body></html>\n"));
-    }  
+    virtual void Send(Print& sink);
 };
 
 
 class RouteNotFoundResponse: public Response {
   public:
   
-    virtual void Send(Print& sink) {
-      sink.print(F("HTTP/1.1 404 NOT FOUND\r\n"));
-    }
+    virtual void Send(Print& sink);
 };
 
 
 class RequestOKResponse: public Response {
   public:
   
-    virtual void Send(Print& sink) {
-      sink.print(F("HTTP/1.1 200 OK\r\n\r\n"));
-    }
+    virtual void Send(Print& sink);
 };
 
 #endif // RESPONSE_H

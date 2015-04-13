@@ -3,40 +3,24 @@
 #ifndef FIXED_LENGTH_STRING_H
 #define FIXED_LENGTH_STRING_H
 
+#include <Arduino.h>
+
+#include "settings.h"
+
 class FixedLengthString {
   public:
 
-    FixedLengthString(char* buffer, uint16_t size) : buffer(buffer), max_len(size - 1), len(0) {
-      buffer[0] = 0;
-    }
-    
-    uint16_t Length() const {
-      return len;
-    }
-    
-    operator const char*() const {
-      return buffer;
-    }
-    
-    boolean Add(char character) {
-      if (len == max_len) return false;
-      
-      buffer[len++] = character;
-      buffer[len] = 0;
-      
-      return true;
-    }
-    
-    FixedLengthString& Clear() {
-      len = 0;
-      buffer[0] = 0;
-      
-      return *this;
-    }
+    FixedLengthString(char* buffer, uint16_t size);
 
-    uint16_t MaxLength() {
-      return max_len;
-    }
+    uint16_t Length() const;
+    
+    operator const char*() const;
+
+    bool Add(char character);
+    
+    FixedLengthString& Clear();
+
+    uint16_t MaxLength();
  
   private:
   

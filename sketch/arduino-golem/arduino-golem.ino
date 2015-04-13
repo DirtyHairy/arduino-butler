@@ -12,28 +12,9 @@
 #include "url_parser.h"
 #include "response.h"
 #include "buffered_printer.h"
+#include "settings.h"
 
-#define DEBUG
-
-#define MAX_ROUTE_LENGTH 20
-#define MAX_HEADER_NAME_LENGTH 20
-#define MAX_HEADER_VALUE_LENGTH 20
-#define REQUEST_TIMEOUT 1000
-#define REQUEST_TRANSFER_BUFFER_SIZE 200
-#define RESPONSE_TRANSFER_BUFFER_SIZE 200
-#define URL_PARSE_BUFFER_SIZE 10
-
-#define SERIAL_BAUD 115200
-#define MAC_ADDRESS 0x00, 0x16, 0x3E, 0x54, 0x5E, 0xA1
-#define IP_ADDRESS 192, 168, 1, 10
-#define SERVER_PORT 80
-
-#define RF_EMITTER_PIN 5
-#define SEND_REPEAT 1
-#define SEND_REPEAT_DELAY 10
-
-
-boolean toggle_switch(uint8_t switch_index, boolean toggle, RCSwitch& rc_switch) {
+bool toggle_switch(uint8_t switch_index, bool toggle, RCSwitch& rc_switch) {
   if (switch_index > 3) return false; 
 
   #ifdef DEBUG
