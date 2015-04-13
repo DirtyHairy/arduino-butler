@@ -6,8 +6,9 @@
 #include <Ethernet.h>
 #include <EthernetServer.h>
 #include <string.h>
+#include <avr/pgmspace.h>
 
-//#define DEBUG
+#define DEBUG
 
 #define MAX_ROUTE_LENGTH 20
 #define MAX_HEADER_NAME_LENGTH 20
@@ -103,7 +104,7 @@ class HttpParser {
             SetState(STATE_FAIL);
           } else if (character == ' ') {
             #ifdef DEBUG
-              Serial.print("Request Method: ");
+              Serial.print(F("Request Method: "));
               Serial.println(method);
             #endif
             
@@ -118,7 +119,7 @@ class HttpParser {
             SetState(STATE_FAIL);
           } else if (character == ' ') {
             #ifdef DEBUG
-              Serial.print("Request Route: ");
+              Serial.print(F("Request Route: "));
               Serial.println(route);
             #endif
             
@@ -131,7 +132,7 @@ class HttpParser {
         case STATE_REQUEST_PROTOCOL:
           if (isTerminator) {
             #ifdef DEBUG
-              Serial.print("Request Protocol: ");
+              Serial.print(F("Request Protocol: "));
               Serial.println(protocol);
             #endif
             
@@ -146,7 +147,7 @@ class HttpParser {
             SetState(header_name.Length() == 0 ? STATE_SUCCESS : STATE_FAIL);
           } else if (character == ':') {
             #ifdef DEBUG
-              Serial.print("Header Name: ");
+              Serial.print(F("Header Name: "));
               Serial.println(header_name);
             #endif
             
@@ -159,7 +160,7 @@ class HttpParser {
         case STATE_HEADER_VALUE:
           if (isTerminator) {
             #ifdef DEBUG
-              Serial.print("Header Value: ");
+              Serial.print(F("Header Value: "));
               Serial.println(header_value);
             #endif
             
@@ -269,7 +270,7 @@ class UrlParser {
       pos = current_pos;
 
       #ifdef DEBUG
-        Serial.print("Path fragment: ");
+        Serial.print(F("Path fragment: "));
         Serial.println(element);
       #endif
 
@@ -327,12 +328,13 @@ boolean toggle_switch(uint8_t switch_index, boolean toggle, RCSwitch& rc_switch)
   if (switch_index > 3) return false; 
 
   #ifdef DEBUG
-    Serial.print("Toggle switch ");
+    Serial.print(F("Toggle switch "));
     Serial.print(switch_index);
-    Serial.println(toggle ? " on" : " off");
+    Serial.println(toggle ? F(" on") : F(" off"));
   #endif
 
-  char code[14] = "000FFFF0FFFFS";
+  char code[14];
+  strcpy_P(code, PSTR("000FFFF0FFFFS"));
 
   switch (switch_index) {
     case 3:
@@ -355,7 +357,7 @@ boolean toggle_switch(uint8_t switch_index, boolean toggle, RCSwitch& rc_switch)
   if (!toggle) code[11] = '0';
 
   #ifdef DEBUG
-    Serial.print("Sending code ");
+    Serial.print(F("Sending code "));
     Serial.print(code);
   #endif
 
@@ -381,7 +383,7 @@ Response& handle_request(HttpParser& parser, RCSwitch& rc_switch) {
   char buffer[URL_PARSE_BUFFER_SIZE];
   
   if (!url_parser.NextPathElement(buffer, URL_PARSE_BUFFER_SIZE)) return response_not_found;
-  if (strcmp(buffer, "socket") != 0) return response_not_found;
+  if (strcmp_P(buffer, PSTR("socket")) != 0) return response_not_found;
  
   if (!url_parser.NextPathElement(buffer, URL_PARSE_BUFFER_SIZE)) return response_not_found;
   if (strlen(buffer) > 2 ) return response_not_found;
@@ -392,9 +394,9 @@ Response& handle_request(HttpParser& parser, RCSwitch& rc_switch) {
   if (!url_parser.NextPathElement(buffer, URL_PARSE_BUFFER_SIZE)) return response_not_found;
   if (!url_parser.AtEnd()) return response_not_found;
   
-  if (strcmp(buffer, "on") == 0) {
+  if (strcmp_P(buffer, PSTR("on")) == 0) {
     if (!toggle_switch(switch_index, true, rc_switch)) return response_not_found;
-  } else if (strcmp(buffer, "off") == 0) {
+  } else if (strcmp_P(buffer, PSTR("off")) == 0) {
     if (!toggle_switch(switch_index, false, rc_switch)) return response_not_found;
   } else {
     return response_not_found;
@@ -425,7 +427,7 @@ void setup() {
   Ethernet.begin(macAddress, ip);
   server.begin();
   
-  Serial.print("Server listening at ");
+  Serial.print(F("Server listening at "));
   Serial.println(Ethernet.localIP());
 }
 
@@ -434,7 +436,7 @@ void loop() {
   
   if (client) {
     #ifdef DEBUG
-      Serial.println("Incoming connection...");
+      Serial.println(F("Incoming connection..."));
     #endif
     
     HttpParser parser;
@@ -458,7 +460,7 @@ void loop() {
     
     if ((abs(millis() - start_timestamp)) > REQUEST_TIMEOUT) {
       #ifdef DEBUG
-        Serial.println("Request timeout");
+        Serial.println(F("Request timeout"));
       #endif
       
       parser.Abort();
