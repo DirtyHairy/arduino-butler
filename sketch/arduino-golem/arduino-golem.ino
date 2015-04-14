@@ -6,22 +6,20 @@
 #include <Ethernet.h>
 #include <EthernetServer.h>
 #include <string.h>
-#include <avr/pgmspace.h>
 
 #include "http_parser.h"
 #include "url_parser.h"
 #include "response.h"
 #include "buffered_printer.h"
 #include "settings.h"
+#include "logging.h"
 
 bool toggle_switch(uint8_t switch_index, bool toggle, RCSwitch& rc_switch) {
   if (switch_index > 3) return false; 
 
-  #ifdef DEBUG
-    Serial.print(F("Toggle switch "));
-    Serial.print(switch_index);
-    Serial.println(toggle ? F(" on") : F(" off"));
-  #endif
+  logging::log(F("Toggle switch "));
+  logging::log(switch_index);
+  logging::logln(toggle ? F(" on") : F(" off"));
 
   char code[14];
   strcpy_P(code, PSTR("000FFFF0FFFFS"));
@@ -46,10 +44,8 @@ bool toggle_switch(uint8_t switch_index, bool toggle, RCSwitch& rc_switch) {
 
   if (!toggle) code[11] = '0';
 
-  #ifdef DEBUG
-    Serial.print(F("Sending code "));
-    Serial.print(code);
-  #endif
+  logging::trace(F("Sending code "));
+  logging::traceln(code);
 
   for (uint8_t i = 0; i < SEND_REPEAT; i++) {
     if (i) delay(SEND_REPEAT_DELAY);
@@ -126,9 +122,7 @@ void parse_request(HttpParser& parser, EthernetClient& client) {
   }
   
   if ((abs(millis() - start_timestamp)) > REQUEST_TIMEOUT) {
-    #ifdef DEBUG
-      Serial.println(F("Request timeout"));
-    #endif
+    logging::logln(F("Request timeout"));
     
     parser.Abort();
   }
@@ -166,17 +160,16 @@ void setup() {
   Ethernet.begin(macAddress, ip);
   server.begin();
   
-  Serial.print(F("Server listening at "));
-  Serial.println(Ethernet.localIP());
+  logging::log(F("Server listening at "));
+  logging::logln(Ethernet.localIP());
 }
+
 
 void loop() {
   EthernetClient client = server.available();
   
   if (client) {
-    #ifdef DEBUG
-      Serial.println(F("Incoming connection..."));
-    #endif
+    logging::logln(F("Incoming connection..."));
     
     HttpParser parser;
 

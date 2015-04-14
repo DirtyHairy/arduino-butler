@@ -4,6 +4,7 @@
 
 #include "fixed_length_string.h"
 #include "url_parser.h"
+#include "logging.h"
 
 UrlParser::UrlParser(const char* url) : url(url), pos(0) {
   url_length = strlen(url);
@@ -28,10 +29,8 @@ bool UrlParser::NextPathElement(char* buffer, uint16_t buffer_size) {
 
   pos = current_pos;
 
-  #ifdef DEBUG
-    Serial.print(F("Path fragment: "));
-    Serial.println(element);
-  #endif
+  logging::trace(F("Path fragment: "));
+  logging::traceln<const char*>(element);
 
   return true;
 }

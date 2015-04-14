@@ -17,10 +17,8 @@ HttpParser& HttpParser::PushChar(char character) {
       if (isTerminator) {
         SetState(STATE_FAIL);
       } else if (character == ' ') {
-        #ifdef DEBUG
-          Serial.print(F("Request Method: "));
-          Serial.println(method);
-        #endif
+        logging::trace(F("Request Method: "));
+        logging::traceln<const char*>(method);
         
         SetState(STATE_REQUEST_URL);
       } else {
@@ -32,10 +30,8 @@ HttpParser& HttpParser::PushChar(char character) {
       if (isTerminator) {
         SetState(STATE_FAIL);
       } else if (character == ' ') {
-        #ifdef DEBUG
-          Serial.print(F("Request Route: "));
-          Serial.println(route);
-        #endif
+        logging::trace(F("Request Route: "));
+        logging::traceln<const char*>(route);
         
         SetState(STATE_REQUEST_PROTOCOL);
       } else {
@@ -45,10 +41,8 @@ HttpParser& HttpParser::PushChar(char character) {
 
     case STATE_REQUEST_PROTOCOL:
       if (isTerminator) {
-        #ifdef DEBUG
-          Serial.print(F("Request Protocol: "));
-          Serial.println(protocol);
-        #endif
+        logging::trace(F("Request Protocol: "));
+        logging::traceln<const char*>(protocol);
         
         SetState(STATE_HEADER_NAME);
       } else {
@@ -60,10 +54,8 @@ HttpParser& HttpParser::PushChar(char character) {
       if (isTerminator) {
         SetState(header_name.Length() == 0 ? STATE_SUCCESS : STATE_FAIL);
       } else if (character == ':') {
-        #ifdef DEBUG
-          Serial.print(F("Header Name: "));
-          Serial.println(header_name);
-        #endif
+        logging::trace(F("Header Name: "));
+        logging::traceln<const char*>(header_name);
         
         SetState(STATE_HEADER_VALUE);
       } else {
@@ -73,10 +65,8 @@ HttpParser& HttpParser::PushChar(char character) {
       
     case STATE_HEADER_VALUE:
       if (isTerminator) {
-        #ifdef DEBUG
-          Serial.print(F("Header Value: "));
-          Serial.println(header_value);
-        #endif
+        logging::trace(F("Header Value: "));
+        logging::traceln<const char*>(header_value);
         
         SetState(STATE_HEADER_NAME);
       } else {

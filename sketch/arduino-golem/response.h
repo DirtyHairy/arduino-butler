@@ -11,6 +11,11 @@ class Response {
   public:
   
     virtual void Send(Print&) = 0;
+  
+  protected:
+
+    virtual void SendHeaders(Print&);
+    virtual void SendBodyStart(Print&);
 };
 
 

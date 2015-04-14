@@ -7,6 +7,7 @@
 
 #include "settings.h"
 #include "fixed_length_string.h"
+#include "logging.h"
 
 #ifndef MAX_ROUTE_LENGTH
   #define MAX_ROUTE_LENGTH 20

@@ -1,4 +1,4 @@
-#define DEBUG
+#define LOG_LEVEL LOG_LEVEL_LOG
 
 #define MAX_ROUTE_LENGTH 20
 #define MAX_HEADER_NAME_LENGTH 20
