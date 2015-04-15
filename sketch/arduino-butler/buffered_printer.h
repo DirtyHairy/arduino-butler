@@ -11,7 +11,7 @@ class BufferedPrinter : public Print {
   
   public:
 
-    BufferedPrinter(uint8_t* buffer, uint16_t buffer_size, Print& backend);
+    BufferedPrinter(uint8_t* buffer, size_t buffer_size, Print& backend, uint16_t timeout = 10);
 
     virtual size_t write(uint8_t value);
 
@@ -23,8 +23,9 @@ class BufferedPrinter : public Print {
     BufferedPrinter& operator=(const BufferedPrinter&);
 
     uint8_t* buffer;
-    uint16_t buffer_size;
-    uint16_t idx;
+    size_t buffer_size;
+    size_t idx;
+    uint16_t timeout;
     Print& backend;
 };
 

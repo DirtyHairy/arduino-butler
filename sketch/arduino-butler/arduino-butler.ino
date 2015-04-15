@@ -13,6 +13,7 @@
 #include "buffered_printer.h"
 #include "settings.h"
 #include "logging.h"
+#include "util.h"
 
 bool toggle_switch(uint8_t switch_index, bool toggle, RCSwitch& rc_switch) {
   if (switch_index > 3) return false; 
@@ -75,7 +76,7 @@ Response& handle_request(HttpParser& parser, RCSwitch& rc_switch) {
   if (strlen(buffer) > 2 ) return response_not_found;
   
   unsigned int switch_index;
-  if (sscanf(buffer, "%u", &switch_index) == 0) return response_not_found;
+  if (sscanf(buffer, "%u", &switch_index) != 1) return response_not_found;
  
   if (!url_parser.NextPathElement(buffer, URL_PARSE_BUFFER_SIZE)) return response_not_found;
   if (!url_parser.AtEnd()) return response_not_found;
@@ -95,33 +96,40 @@ Response& handle_request(HttpParser& parser, RCSwitch& rc_switch) {
 
 
 void parse_request(HttpParser& parser, EthernetClient& client) {
-  uint32_t start_timestamp = millis();
+  uint32_t timestamp = millis();
   
   while (
     client.connected() &&
-    abs(millis() - start_timestamp) <= REQUEST_TIMEOUT &&
-    parser.Status() == HttpParser::STATUS_PARSING)
-  {
-    int bytes_available;
+    util::time_delta(timestamp) <= REQUEST_TIMEOUT &&
+    parser.Status() == HttpParser::STATUS_PARSING
+  ) {
+    size_t bytes_available;
 
     while(
       parser.Status() == HttpParser::STATUS_PARSING &&
+      util::time_delta(timestamp) <= REQUEST_TIMEOUT &&
       (bytes_available = client.available())
     ) {
       char buffer[REQUEST_TRANSFER_BUFFER_SIZE];
-      uint8_t to_read =
+
+      size_t bytes_to_read =
         bytes_available > REQUEST_TRANSFER_BUFFER_SIZE ?
         REQUEST_TRANSFER_BUFFER_SIZE :
         bytes_available;
 
-      client.readBytes(buffer, to_read);
-      for (uint8_t i = 0; i < to_read; i++) {
+      size_t bytes_read = client.readBytes(buffer, bytes_to_read);
+
+      logging::trace(F("pushing "));
+      logging::trace(bytes_read);
+      logging::traceln(F(" bytes to http parser"));
+
+      for (size_t i = 0; i < bytes_read; i++) {
         parser.PushChar(buffer[i]);
       }
     };
   }
   
-  if ((abs(millis() - start_timestamp)) > REQUEST_TIMEOUT) {
+  if (util::time_delta(timestamp) > REQUEST_TIMEOUT) {
     logging::logln(F("Request timeout"));
     
     parser.Abort();
@@ -131,7 +139,7 @@ void parse_request(HttpParser& parser, EthernetClient& client) {
 
 void send_response(Response& response, EthernetClient& client) {
   uint8_t buffer[RESPONSE_TRANSFER_BUFFER_SIZE];
-  BufferedPrinter printer(buffer, RESPONSE_TRANSFER_BUFFER_SIZE, client);
+  BufferedPrinter printer(buffer, RESPONSE_TRANSFER_BUFFER_SIZE, client, RESPONSE_TIMEOUT);
 
   response.Send(printer);
 
@@ -177,7 +185,7 @@ void loop() {
 
     send_response(handle_request(parser, rc_switch), client);
  
-    delay(10);
+    delay(CLIENT_CLOSE_GRACE_TIME);
  
     client.stop(); 
   }

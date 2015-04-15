@@ -10,9 +10,9 @@
 class FixedLengthString {
   public:
 
-    FixedLengthString(char* buffer, uint16_t size);
+    FixedLengthString(char* buffer, size_t size);
 
-    uint16_t Length() const;
+    size_t Length() const;
     
     operator const char*() const;
 
@@ -20,7 +20,7 @@ class FixedLengthString {
     
     FixedLengthString& Clear();
 
-    uint16_t MaxLength();
+    size_t MaxLength();
  
   private:
   
@@ -28,8 +28,8 @@ class FixedLengthString {
     FixedLengthString& operator =(const FixedLengthString&);
   
     char* buffer;
-    uint16_t max_len;
-    uint16_t len;
+    size_t max_len;
+    size_t len;
 };
 
 

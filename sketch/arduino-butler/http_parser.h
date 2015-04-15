@@ -63,6 +63,7 @@ class HttpParser {
     AllocatedFixedLengthString<MAX_HEADER_VALUE_LENGTH> header_value;
     
     char last_char;
+    bool parsing_query_parameters;
 };
 
 #endif // HTTP_PARSER_H

@@ -12,14 +12,14 @@ class UrlParser {
   
     UrlParser(const char* url);
 
-    bool NextPathElement(char* buffer, uint16_t buffer_size);    
+    bool NextPathElement(char* buffer, size_t buffer_size);    
 
     bool AtEnd();
   private:
   
     const char* url;
-    uint16_t url_length;
-    uint16_t pos;
+    size_t url_length;
+    size_t pos;
 };
 
 

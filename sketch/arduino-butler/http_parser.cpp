@@ -2,11 +2,15 @@
 
 #include "http_parser.h"
 
-HttpParser::HttpParser() : state(STATE_REQUEST_METHOD), last_char(0) {}
+HttpParser::HttpParser() :
+  state(STATE_REQUEST_METHOD),
+  last_char(0),
+  parsing_query_parameters(false)
+{}
 
 HttpParser& HttpParser::PushChar(char character) {
-  bool isTerminator = (character == '\n') && (last_char == '\r');
-  
+  bool is_terminator = (character == '\n') && (last_char == '\r');
+
   if (character == '\r') {
     last_char = character;
     return *this;
@@ -14,7 +18,7 @@ HttpParser& HttpParser::PushChar(char character) {
   
   switch (state) {
     case STATE_REQUEST_METHOD:
-      if (isTerminator) {
+      if (is_terminator) {
         SetState(STATE_FAIL);
       } else if (character == ' ') {
         logging::trace(F("Request Method: "));
@@ -27,7 +31,7 @@ HttpParser& HttpParser::PushChar(char character) {
       break;
     
     case STATE_REQUEST_URL:
-      if (isTerminator) {
+      if (is_terminator) {
         SetState(STATE_FAIL);
       } else if (character == ' ') {
         logging::trace(F("Request Route: "));
@@ -35,12 +39,13 @@ HttpParser& HttpParser::PushChar(char character) {
         
         SetState(STATE_REQUEST_PROTOCOL);
       } else {
-        route.Add(character);
+        parsing_query_parameters = parsing_query_parameters || character == '?';
+        if (!parsing_query_parameters) route.Add(character);
       }
       break;
 
     case STATE_REQUEST_PROTOCOL:
-      if (isTerminator) {
+      if (is_terminator) {
         logging::trace(F("Request Protocol: "));
         logging::traceln<const char*>(protocol);
         
@@ -51,7 +56,7 @@ HttpParser& HttpParser::PushChar(char character) {
       break;
     
     case STATE_HEADER_NAME:
-      if (isTerminator) {
+      if (is_terminator) {
         SetState(header_name.Length() == 0 ? STATE_SUCCESS : STATE_FAIL);
       } else if (character == ':') {
         logging::trace(F("Header Name: "));
@@ -64,7 +69,7 @@ HttpParser& HttpParser::PushChar(char character) {
       break;
       
     case STATE_HEADER_VALUE:
-      if (isTerminator) {
+      if (is_terminator) {
         logging::trace(F("Header Value: "));
         logging::traceln<const char*>(header_value);
         
@@ -76,7 +81,9 @@ HttpParser& HttpParser::PushChar(char character) {
       break;
 
    }
-   
+
+   last_char = character;
+
    return *this;
 }
 

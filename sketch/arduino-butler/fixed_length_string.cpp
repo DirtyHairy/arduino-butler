@@ -2,11 +2,11 @@
 
 #include "fixed_length_string.h"
 
-FixedLengthString::FixedLengthString(char* buffer, uint16_t size) : buffer(buffer), max_len(size - 1), len(0) {
+FixedLengthString::FixedLengthString(char* buffer, size_t size) : buffer(buffer), max_len(size - 1), len(0) {
   buffer[0] = 0;
 }
 
-uint16_t FixedLengthString::Length() const {
+size_t FixedLengthString::Length() const {
   return len;
 }
 
@@ -30,6 +30,6 @@ FixedLengthString& FixedLengthString::Clear() {
   return *this;
 }
 
-uint16_t FixedLengthString::MaxLength() {
+size_t FixedLengthString::MaxLength() {
   return max_len;
 }

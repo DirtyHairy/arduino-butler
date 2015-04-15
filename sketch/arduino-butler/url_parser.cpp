@@ -12,12 +12,14 @@ UrlParser::UrlParser(const char* url) : url(url), pos(0) {
   if (url_length > 0 && url[0] == '/') pos = 1;
 }
 
-bool UrlParser::NextPathElement(char* buffer, uint16_t buffer_size) {
-  uint16_t current_pos = pos;
+bool UrlParser::NextPathElement(char* buffer, size_t buffer_size) {
+  size_t current_pos = pos;
   FixedLengthString element(buffer, buffer_size);
   
   while (true) {
-    if (current_pos >= url_length || url[current_pos] == '/') {
+    if (current_pos >= url_length) break;
+
+    if (url[current_pos] == '/') {
       current_pos++;
       break;
     }
