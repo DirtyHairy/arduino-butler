@@ -1,0 +1,14 @@
+{
+  "name": "arduino-butler",
+  "version": "0.0.0",
+  "homepage": "https://github.com/DirtyHairy/arduino-butler",
+  "authors": [
+    "Christian Speckner <cnspeckn@googlemail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "bootstrap": "~3.3.4",
+    "angular": "~1.3.15"
+  }
+}

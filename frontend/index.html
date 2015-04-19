@@ -1,0 +1,46 @@
+<html>
+
+<head>
+    <title>Toggles</title>
+    <script src="bower_components/angular/angular.min.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css"/>
+</head>
+
+<body ng-app="toggles" ng-controller="socketController as controller">
+    <div class="container" >
+        <div class=container" ng-repeat="socket in sockets">
+            <h2>{{socket.name}}</h2>
+        <div class="btn-group">
+            <button class="btn btn-primary" ng-click="controller.toggle(socket.index, true)">Ein</button>
+            <button class="btn btn-primary" ng-click="controller.toggle(socket.index, false)">Aus</button>
+        </div>
+        </p>
+    </div>
+    <script>
+
+angular.module('toggles', ['ui.bootstrap'])
+    .value('sockets', [
+        {
+            name: 'Wohnzimmerbuffet',
+            index: 0
+        }, {
+            name: 'Essecke',
+            index: 1
+        }
+    ])
+    .controller('socketController', ['$http', '$scope', 'sockets', function($http, $scope, sockets) {
+
+        $scope.sockets = sockets;
+
+        this.toggle = function(index, state) {
+            $http.get('http://butler/socket/' + index + '/' + (state ? 'on' : 'off'));
+        };
+
+    }]);
+
+    </script>
+</body>
+
+</html>
