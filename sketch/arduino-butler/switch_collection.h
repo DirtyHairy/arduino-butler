@@ -1,4 +1,4 @@
-// vim: softtabstop=2 tabstop=2 tw=120
+// vim: softtabstop=2 tabstop=2 tw=120 shiftwidth=2
 
 /**
  * The MIT License (MIT)
@@ -25,32 +25,31 @@
  * 
  */
 
-#ifndef URL_PARSER_H
-#define URL_PARSER_H
+#ifndef SWITCH_COLLECTION_H
+#define SWITCH_COLLECTION_H
 
 #include <Arduino.h>
 
-#include "settings.h"
+#include "switch_controller.h"
 
-class UrlParser {
+class SwitchCollection {
   public:
-  
-    UrlParser(const char* url);
 
-    bool NextPathElement(char* buffer, size_t buffer_size);    
+    SwitchCollection(SwitchController** switches, uint8_t switch_count);
 
-    bool AtEnd();
+    bool Toggle(uint8_t index, bool state);
+
+    void Bump();
 
   private:
-  
-    UrlParser(const UrlParser&);
 
-    UrlParser& operator=(const UrlParser&);
+    SwitchCollection(const SwitchCollection&);
 
-    const char* url;
-    size_t url_length;
-    size_t pos;
+    SwitchCollection& operator=(SwitchCollection&);
+
+    SwitchController** switches;
+    uint8_t switch_count;
+    uint8_t last_thunk_index;
 };
 
-
-#endif // URL_PARSER_H
+#endif // SWITCH_COLLECTION_H

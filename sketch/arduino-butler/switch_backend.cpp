@@ -1,4 +1,4 @@
-// vim: softtabstop=2 tabstop=2 tw=120
+// vim: softtabstop=2 tabstop=2 tw=120 shiftwidth=2
 
 /**
  * The MIT License (MIT)
@@ -25,32 +25,55 @@
  * 
  */
 
-#ifndef URL_PARSER_H
-#define URL_PARSER_H
+#include "switch_backend.h"
+#include "logging.h"
 
-#include <Arduino.h>
+CustomSwitch1::CustomSwitch1(RCSwitch& rc_switch) : rc_switch(rc_switch), index(0) {}
 
-#include "settings.h"
+CustomSwitch1& CustomSwitch1::Index(uint8_t index) {
+  if (index >= 0 && index < 4) {
+    this->index = index;
+  }
 
-class UrlParser {
-  public:
-  
-    UrlParser(const char* url);
-
-    bool NextPathElement(char* buffer, size_t buffer_size);    
-
-    bool AtEnd();
-
-  private:
-  
-    UrlParser(const UrlParser&);
-
-    UrlParser& operator=(const UrlParser&);
-
-    const char* url;
-    size_t url_length;
-    size_t pos;
-};
+  return *this;
+}
 
 
-#endif // URL_PARSER_H
+bool CustomSwitch1::Toggle(bool state) {
+  logging::log(F("Toggle switch "));
+  logging::log(index);
+  logging::logln(state ? F(" on") : F(" off"));
+
+  char code[14];
+  strcpy_P(code, PSTR("000FFFF0FFFFS"));
+
+  switch (index) {
+    case 3:
+      code[3] = '0';
+      break;
+
+    case 2:
+      code[4] = '0';
+      break;
+
+    case 1:
+      code[6] = '0';
+      break;
+
+    case 0:
+      code[5] = '0';
+      break;
+  }
+
+  if (!state) code[11] = '0';
+
+  logging::trace(F("Sending code "));
+  logging::traceln(code);
+
+  for (uint8_t i = 0; i < SEND_REPEAT; i++) {
+    if (i) delay(SEND_REPEAT_DELAY);
+    rc_switch.sendTriState(code);
+  }
+
+  return true;
+}

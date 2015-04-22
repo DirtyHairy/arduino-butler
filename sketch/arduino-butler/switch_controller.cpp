@@ -1,4 +1,4 @@
-// vim: softtabstop=2 tabstop=2 tw=120
+// vim: softtabstop=2 tabstop=2 tw=120 shiftwidth=2
 
 /**
  * The MIT License (MIT)
@@ -25,32 +25,38 @@
  * 
  */
 
-#ifndef URL_PARSER_H
-#define URL_PARSER_H
+#include "switch_controller.h"
+#include "logging.h"
 
-#include <Arduino.h>
-
-#include "settings.h"
-
-class UrlParser {
-  public:
-  
-    UrlParser(const char* url);
-
-    bool NextPathElement(char* buffer, size_t buffer_size);    
-
-    bool AtEnd();
-
-  private:
-  
-    UrlParser(const UrlParser&);
-
-    UrlParser& operator=(const UrlParser&);
-
-    const char* url;
-    size_t url_length;
-    size_t pos;
-};
+PlainSwitchController::PlainSwitchController(SwitchBackend& backend) : backend(backend) {}
 
 
-#endif // URL_PARSER_H
+bool PlainSwitchController::Toggle(bool state) {
+  return backend.Toggle(state);
+}
+
+
+bool PlainSwitchController::Bump() {
+  return false;
+}
+
+
+StickySwitchController::StickySwitchController(SwitchBackend& backend) : backend(backend) {}
+
+
+bool StickySwitchController::Toggle(bool state) {
+  bool success = backend.Toggle(state);
+
+  if (success) this->state = state;
+
+  return success;
+}
+
+
+bool StickySwitchController::Bump() {
+  logging::traceln(F("bumping switch state... "));
+
+  backend.Toggle(state);
+
+  return true;
+}

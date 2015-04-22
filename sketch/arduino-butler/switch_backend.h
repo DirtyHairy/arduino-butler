@@ -1,4 +1,4 @@
-// vim: softtabstop=2 tabstop=2 tw=120
+// vim: softtabstop=2 tabstop=2 tw=120 shiftwidth=2
 
 /**
  * The MIT License (MIT)
@@ -25,32 +25,45 @@
  * 
  */
 
-#ifndef URL_PARSER_H
-#define URL_PARSER_H
+#ifndef SWITCH_BACKEND_H
+#define SWITCH_BACKEND_H
 
 #include <Arduino.h>
+#include <RCSwitch.h>
 
 #include "settings.h"
 
-class UrlParser {
+#ifndef SEND_REPEAT
+  #define SEND_REPEAT 1
+#endif
+#ifndef SEND_REPEAT_DELAY
+  #define SEND_REPEAT_DELAY 10
+#endif
+
+class SwitchBackend {
   public:
-  
-    UrlParser(const char* url);
 
-    bool NextPathElement(char* buffer, size_t buffer_size);    
-
-    bool AtEnd();
-
-  private:
-  
-    UrlParser(const UrlParser&);
-
-    UrlParser& operator=(const UrlParser&);
-
-    const char* url;
-    size_t url_length;
-    size_t pos;
+    virtual bool Toggle(bool state) = 0;
 };
 
+class CustomSwitch1 : public SwitchBackend {
+  public:
 
-#endif // URL_PARSER_H
+    CustomSwitch1(RCSwitch& rc_switch);
+
+    virtual bool Toggle(bool state);
+
+    CustomSwitch1& Index(uint8_t index);
+
+  private:
+
+    CustomSwitch1(const CustomSwitch1&);
+
+    CustomSwitch1& operator=(const CustomSwitch1&);
+
+    RCSwitch& rc_switch;
+
+    uint8_t index;
+};
+
+#endif // SWITCH_BACKEND_H

@@ -1,4 +1,4 @@
-// vim: softtabstop=2 tabstop=2 tw=120
+// vim: softtabstop=2 tabstop=2 tw=120 shiftwidth=2
 
 /**
  * The MIT License (MIT)
@@ -25,32 +25,33 @@
  * 
  */
 
-#ifndef URL_PARSER_H
-#define URL_PARSER_H
+#include "switch_collection.h"
+#include "logging.h"
 
-#include <Arduino.h>
-
-#include "settings.h"
-
-class UrlParser {
-  public:
-  
-    UrlParser(const char* url);
-
-    bool NextPathElement(char* buffer, size_t buffer_size);    
-
-    bool AtEnd();
-
-  private:
-  
-    UrlParser(const UrlParser&);
-
-    UrlParser& operator=(const UrlParser&);
-
-    const char* url;
-    size_t url_length;
-    size_t pos;
-};
+SwitchCollection::SwitchCollection(SwitchController** switches, uint8_t switch_count) :
+  switches(switches),
+  switch_count(switch_count),
+  last_thunk_index(switch_count - 1)
+{}
 
 
-#endif // URL_PARSER_H
+bool SwitchCollection::Toggle(uint8_t index, bool state) {
+  if (index >= switch_count) return false;
+
+  return switches[index]->Toggle(state);
+}
+
+
+void SwitchCollection::Bump() {
+  uint8_t tries = 0;
+  bool success = false;
+
+  while (!success && tries++ < switch_count) {
+    last_thunk_index = (last_thunk_index + 1) % switch_count;
+
+    logging::trace(F("bumping switch at index "));
+    logging::traceln(last_thunk_index);
+
+    success = switches[last_thunk_index]->Bump();
+  }
+}

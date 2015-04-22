@@ -39,50 +39,38 @@
 #include "settings.h"
 #include "logging.h"
 #include "util.h"
+#include "switch_collection.h"
+#include "switch_backend.h"
+#include "switch_controller.h"
 
-bool toggle_switch(uint8_t switch_index, bool toggle, RCSwitch& rc_switch) {
-  if (switch_index > 3) return false; 
+EthernetServer server(SERVER_PORT);
+SwitchCollection* switch_collection;
 
-  logging::log(F("Toggle switch "));
-  logging::log(switch_index);
-  logging::logln(toggle ? F(" on") : F(" off"));
+template<class ControllerT, unsigned int index> SwitchController* allocate_switch(RCSwitch& rc_switch) {
+  static CustomSwitch1 backend(rc_switch);
+  static ControllerT controller(backend);
 
-  char code[14];
-  strcpy_P(code, PSTR("000FFFF0FFFFS"));
+  backend.Index(index);
 
-  switch (switch_index) {
-    case 3:
-      code[3] = '0';
-      break;
-
-    case 2:
-      code[4] = '0';
-      break;
-
-    case 1:
-      code[6] = '0';
-      break;
-
-    case 0:
-      code[5] = '0';
-      break;
-  }
-
-  if (!toggle) code[11] = '0';
-
-  logging::trace(F("Sending code "));
-  logging::traceln(code);
-
-  for (uint8_t i = 0; i < SEND_REPEAT; i++) {
-    if (i) delay(SEND_REPEAT_DELAY);
-    rc_switch.sendTriState(code);
-  }
-
-  return true;
+  return &controller;
 }
 
 
-Response& handle_request(HttpParser& parser, RCSwitch& rc_switch) {
+void initialize_switches(RCSwitch& rc_switch) {
+  static SwitchController* switches[4];
+
+  switches[0] = allocate_switch<PlainSwitchController, 0>(rc_switch);
+  switches[1] = allocate_switch<PlainSwitchController, 1>(rc_switch);
+  switches[2] = allocate_switch<StickySwitchController, 2>(rc_switch);
+  switches[3] = allocate_switch<StickySwitchController, 3>(rc_switch);
+
+  static SwitchCollection collection(switches, 4);
+
+  switch_collection = &collection;
+}
+
+
+Response& handle_request(HttpParser& parser) {
   static BadRequestResponse response_bad_request;
   static RouteNotFoundResponse response_not_found;
   static RequestOKResponse response_ok;
@@ -107,10 +95,10 @@ Response& handle_request(HttpParser& parser, RCSwitch& rc_switch) {
   if (!url_parser.AtEnd()) return response_not_found;
   
   if (strcmp_P(buffer, PSTR("on")) == 0) {
-    if (!toggle_switch(switch_index, true, rc_switch)) return response_not_found;
+    if (!switch_collection->Toggle(switch_index, true)) return response_not_found;
 
   } else if (strcmp_P(buffer, PSTR("off")) == 0) {
-    if (!toggle_switch(switch_index, false, rc_switch)) return response_not_found;
+    if (!switch_collection->Toggle(switch_index, false)) return response_not_found;
 
   } else {
     return response_not_found;
@@ -172,10 +160,6 @@ void send_response(Response& response, EthernetClient& client) {
 }
 
 
-EthernetServer server(SERVER_PORT);
-RCSwitch rc_switch;
-
-
 void setup() {
   byte macAddress[] = {MAC_ADDRESS};
   IPAddress ip(IP_ADDRESS);
@@ -186,8 +170,12 @@ void setup() {
   digitalWrite(4, HIGH);
   digitalWrite(10, LOW);
  
+  static RCSwitch rc_switch;
+
   pinMode(RF_EMITTER_PIN, OUTPUT);
   rc_switch.enableTransmit(RF_EMITTER_PIN);
+
+  initialize_switches(rc_switch);
 
   Serial.begin(SERIAL_BAUD);
   Ethernet.begin(macAddress, ip);
@@ -199,6 +187,8 @@ void setup() {
 
 
 void loop() {
+  static uint16_t last_thunk_timestamp = 0;
+
   EthernetClient client = server.available();
   
   if (client) {
@@ -208,10 +198,15 @@ void loop() {
 
     parse_request(parser, client);
 
-    send_response(handle_request(parser, rc_switch), client);
+    send_response(handle_request(parser), client);
  
     delay(CLIENT_CLOSE_GRACE_TIME);
  
     client.stop(); 
+
+  } else if (util::time_delta(last_thunk_timestamp) > SWITCH_THUNK_INTERVAL) {
+    last_thunk_timestamp = millis();
+
+    switch_collection->Bump();
   }
 }
