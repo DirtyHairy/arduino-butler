@@ -29,15 +29,25 @@
 #include "logging.h"
 
 
-RCSwitch* CustomSwitch1Impl::rc_switch = NULL;
+RCSwitch* CustomSwitch1::rc_switch = NULL;
 
 
-void CustomSwitch1Impl::SetRCSwitch(RCSwitch* rc_switch) {
-  CustomSwitch1Impl::rc_switch = rc_switch;
+CustomSwitch1::CustomSwitch1() : index(0) {}
+
+
+void CustomSwitch1::SetRCSwitch(RCSwitch* rc_switch) {
+  CustomSwitch1::rc_switch = rc_switch;
 }
 
 
-bool CustomSwitch1Impl::Toggle(bool state, uint8_t index) {
+CustomSwitch1& CustomSwitch1::Index(uint8_t index) {
+  if (index < 4) this->index = index;
+
+  return *this;
+}
+
+
+bool CustomSwitch1::Toggle(bool state) {
   logging::log(F("Toggle switch "));
   logging::log(index);
   logging::logln(state ? F(" on") : F(" off"));

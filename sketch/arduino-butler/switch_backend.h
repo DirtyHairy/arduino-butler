@@ -40,23 +40,26 @@
   #define SEND_REPEAT_DELAY 10
 #endif
 
-class CustomSwitch1Impl {
+class CustomSwitch1 {
   public:
 
     static void SetRCSwitch(RCSwitch* rc_switch);
 
-  protected:
+    CustomSwitch1();
 
-    static bool Toggle(bool state, uint8_t index);
+    bool Toggle(bool state);
+
+    CustomSwitch1& Index(uint8_t index);
+
+  private:
+
+    CustomSwitch1(CustomSwitch1&);
+
+    CustomSwitch1& operator=(const CustomSwitch1&);
+
     static RCSwitch* rc_switch;
-};
 
-template<unsigned int index> class CustomSwitch1 : public CustomSwitch1Impl {
-  public:
-
-    bool Toggle(bool state) {
-      return CustomSwitch1Impl::Toggle(state, index);
-    };
+    uint8_t index;
 };
 
 #endif // SWITCH_BACKEND_H

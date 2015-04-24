@@ -46,24 +46,24 @@
 EthernetServer server(SERVER_PORT);
 SwitchCollection<4> switch_collection;
 
-template<class ControllerT, unsigned int index> void add_switch() {
-  static CustomSwitch1<index> backend;
-  static ControllerT controller(backend);
+void initialize_switches(RCSwitch* rc_switch) {
+  CustomSwitch1::SetRCSwitch(rc_switch);
 
-  switch_collection.SetSwitch(&controller, index);
-}
+  static PlainSwitchController<CustomSwitch1> switch0;
+  switch0.Backend().Index(0);
+  switch_collection.SetSwitch(&switch0, 0);
 
+  static PlainSwitchController<CustomSwitch1> switch1;
+  switch1.Backend().Index(1);
+  switch_collection.SetSwitch(&switch1, 1);
 
-void initialize_switches(RCSwitch& rc_switch) {
-  CustomSwitch1Impl::SetRCSwitch(&rc_switch);
+  static StickySwitchController<CustomSwitch1> switch2;
+  switch2.Backend().Index(2);
+  switch_collection.SetSwitch(&switch2, 2);
 
-  add_switch<PlainSwitchController<CustomSwitch1<0> >, 0>();
-
-  add_switch<PlainSwitchController<CustomSwitch1<1> >, 1>();
-
-  add_switch<StickySwitchController<CustomSwitch1<2> >, 2>();
-
-  add_switch<StickySwitchController<CustomSwitch1<3> >, 3>();
+  static StickySwitchController<CustomSwitch1> switch3;
+  switch3.Backend().Index(3);
+  switch_collection.SetSwitch(&switch3, 3);
 }
 
 
@@ -172,7 +172,7 @@ void setup() {
   pinMode(RF_EMITTER_PIN, OUTPUT);
   rc_switch.enableTransmit(RF_EMITTER_PIN);
 
-  initialize_switches(rc_switch);
+  initialize_switches(&rc_switch);
 
   Serial.begin(SERIAL_BAUD);
   Ethernet.begin(macAddress, ip);
@@ -184,7 +184,7 @@ void setup() {
 
 
 void loop() {
-  static uint16_t last_thunk_timestamp = 0;
+  static uint16_t last_bump_timestamp = 0;
 
   EthernetClient client = server.available();
   
@@ -201,8 +201,8 @@ void loop() {
  
     client.stop(); 
 
-  } else if (util::time_delta(last_thunk_timestamp) > SWITCH_THUNK_INTERVAL) {
-    last_thunk_timestamp = millis();
+  } else if (util::time_delta(last_bump_timestamp) > SWITCH_BUMP_INTERVAL) {
+    last_bump_timestamp = millis();
 
     switch_collection.Bump();
   }

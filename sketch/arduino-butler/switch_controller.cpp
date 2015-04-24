@@ -30,10 +30,10 @@
 
 
 bool SwitchController::Toggle(bool state) {
-  return this->toggle_impl(this, state);
+  return this->implementation->toggle(this, state);
 }
 
 
 bool SwitchController::Bump() {
-  return this->bump_impl(this);
+  return this->implementation->bump(this);
 }

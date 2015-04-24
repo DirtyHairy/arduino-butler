@@ -48,18 +48,38 @@ class SwitchController {
 
     SwitchController& operator=(const SwitchController&);
 
-    bool (*toggle_impl)(SwitchController* controller, bool state);
+    struct Implementation {
+      bool (*toggle)(SwitchController* controller, bool state);
+      bool (*bump) (SwitchController* controller);
+    };
 
-    bool (*bump_impl) (SwitchController* controller);
+    Implementation* implementation;
 };
 
 
-template<class BackendT> class PlainSwitchController : public SwitchController {
+template<class BackendT> class BaseSwitchController : public SwitchController {
+
   public:
 
-    PlainSwitchController(BackendT& backend) : backend(backend) {
-      toggle_impl = ToggleImpl;
-      bump_impl = BumpImpl;
+    BaseSwitchController() {}
+
+    BackendT& Backend() {
+      return backend;
+    }
+
+  protected:
+
+    BackendT backend;
+};
+
+
+template<class BackendT> class PlainSwitchController : public BaseSwitchController<BackendT> {
+  public:
+
+    PlainSwitchController() {
+      static SwitchController::Implementation impl = {ToggleImpl, BumpImpl};
+
+      SwitchController::implementation = &impl;
     }
 
   private:
@@ -73,17 +93,16 @@ template<class BackendT> class PlainSwitchController : public SwitchController {
     static bool BumpImpl(SwitchController* controller) {
       return false;
     }
-
-    BackendT& backend;
 };
 
 
-template<class BackendT> class StickySwitchController : public SwitchController {
+template<class BackendT> class StickySwitchController : public BaseSwitchController<BackendT> {
   public:
 
-    StickySwitchController(BackendT& backend) : backend(backend), state(false) {
-      toggle_impl = ToggleImpl;
-      bump_impl = BumpImpl;
+    StickySwitchController() : state(false) {
+      static SwitchController::Implementation impl = {ToggleImpl, BumpImpl};
+
+      SwitchController::implementation = &impl;
     }
 
   private:
@@ -98,7 +117,6 @@ template<class BackendT> class StickySwitchController : public SwitchController 
       return success;
     }
 
-
     static bool BumpImpl(SwitchController* controller) {
       StickySwitchController<BackendT>* that = static_cast<StickySwitchController<BackendT>* >(controller);
 
@@ -108,9 +126,6 @@ template<class BackendT> class StickySwitchController : public SwitchController 
 
         return true;
     }
-
-
-    BackendT& backend;
 
     bool state;
 };

@@ -48,19 +48,19 @@ template<unsigned int N> class SwitchCollection {
       bool success = false;
 
       while (!success && tries++ < N) {
-        last_thunk_index = (last_thunk_index + 1) % switch_count;
+        last_bump_index = (last_bump_index + 1) % switch_count;
 
         logging::trace(F("bumping switch at index "));
-        logging::traceln(last_thunk_index);
+        logging::traceln(last_bump_index);
 
-        success = switches[last_thunk_index]->Bump();
+        success = switches[last_bump_index]->Bump();
       }
     }
 
-    SwitchCollection& SetSwitch(SwitchController* controller, uint8_t index) {
+    SwitchController* SetSwitch(SwitchController* controller, uint8_t index) {
       if (index < N) switches[index] = controller;
 
-      return *this;
+      controller;
     }
 
   private:
@@ -71,7 +71,7 @@ template<unsigned int N> class SwitchCollection {
 
     SwitchController* switches[N];
     uint8_t switch_count;
-    uint8_t last_thunk_index;
+    uint8_t last_bump_index;
 };
 
 #endif // SWITCH_COLLECTION_H
