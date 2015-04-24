@@ -28,35 +28,12 @@
 #include "switch_controller.h"
 #include "logging.h"
 
-PlainSwitchController::PlainSwitchController(SwitchBackend& backend) : backend(backend) {}
 
-
-bool PlainSwitchController::Toggle(bool state) {
-  return backend.Toggle(state);
+bool SwitchController::Toggle(bool state) {
+  return this->toggle_impl(this, state);
 }
 
 
-bool PlainSwitchController::Bump() {
-  return false;
-}
-
-
-StickySwitchController::StickySwitchController(SwitchBackend& backend) : backend(backend) {}
-
-
-bool StickySwitchController::Toggle(bool state) {
-  bool success = backend.Toggle(state);
-
-  if (success) this->state = state;
-
-  return success;
-}
-
-
-bool StickySwitchController::Bump() {
-  logging::traceln(F("bumping switch state... "));
-
-  backend.Toggle(state);
-
-  return true;
+bool SwitchController::Bump() {
+  return this->bump_impl(this);
 }

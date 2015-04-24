@@ -28,18 +28,16 @@
 #include "switch_backend.h"
 #include "logging.h"
 
-CustomSwitch1::CustomSwitch1(RCSwitch& rc_switch) : rc_switch(rc_switch), index(0) {}
 
-CustomSwitch1& CustomSwitch1::Index(uint8_t index) {
-  if (index >= 0 && index < 4) {
-    this->index = index;
-  }
+RCSwitch* CustomSwitch1Impl::rc_switch = NULL;
 
-  return *this;
+
+void CustomSwitch1Impl::SetRCSwitch(RCSwitch* rc_switch) {
+  CustomSwitch1Impl::rc_switch = rc_switch;
 }
 
 
-bool CustomSwitch1::Toggle(bool state) {
+bool CustomSwitch1Impl::Toggle(bool state, uint8_t index) {
   logging::log(F("Toggle switch "));
   logging::log(index);
   logging::logln(state ? F(" on") : F(" off"));
@@ -72,7 +70,7 @@ bool CustomSwitch1::Toggle(bool state) {
 
   for (uint8_t i = 0; i < SEND_REPEAT; i++) {
     if (i) delay(SEND_REPEAT_DELAY);
-    rc_switch.sendTriState(code);
+    rc_switch->sendTriState(code);
   }
 
   return true;

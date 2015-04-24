@@ -32,14 +32,36 @@
 
 #include "switch_controller.h"
 
-class SwitchCollection {
+template<unsigned int N> class SwitchCollection {
   public:
 
-    SwitchCollection(SwitchController** switches, uint8_t switch_count);
+    SwitchCollection() {}
 
-    bool Toggle(uint8_t index, bool state);
+    bool Toggle(uint8_t index, bool state) {
+      if (index >= N) return false;
 
-    void Bump();
+      return switches[index]->Toggle(state);
+    }
+
+    void Bump() {
+      uint8_t tries = 0;
+      bool success = false;
+
+      while (!success && tries++ < N) {
+        last_thunk_index = (last_thunk_index + 1) % switch_count;
+
+        logging::trace(F("bumping switch at index "));
+        logging::traceln(last_thunk_index);
+
+        success = switches[last_thunk_index]->Bump();
+      }
+    }
+
+    SwitchCollection& SetSwitch(SwitchController* controller, uint8_t index) {
+      if (index < N) switches[index] = controller;
+
+      return *this;
+    }
 
   private:
 
@@ -47,7 +69,7 @@ class SwitchCollection {
 
     SwitchCollection& operator=(SwitchCollection&);
 
-    SwitchController** switches;
+    SwitchController* switches[N];
     uint8_t switch_count;
     uint8_t last_thunk_index;
 };

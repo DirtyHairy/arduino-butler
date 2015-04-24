@@ -31,51 +31,86 @@
 #include <Arduino.h>
 
 #include "switch_backend.h"
+#include "logging.h"
 
 class SwitchController {
   public:
 
-    virtual bool Toggle(bool state) = 0;
+    SwitchController() {};
 
-    virtual bool Bump() = 0;
+    bool Toggle(bool state);
+
+    bool Bump();
+
+  protected:
+
+    SwitchController(const SwitchController&);
+
+    SwitchController& operator=(const SwitchController&);
+
+    bool (*toggle_impl)(SwitchController* controller, bool state);
+
+    bool (*bump_impl) (SwitchController* controller);
 };
 
 
-class PlainSwitchController : public SwitchController {
+template<class BackendT> class PlainSwitchController : public SwitchController {
   public:
 
-    PlainSwitchController(SwitchBackend& backend);
-
-    virtual bool Toggle(bool state);
-
-    virtual bool Bump();
+    PlainSwitchController(BackendT& backend) : backend(backend) {
+      toggle_impl = ToggleImpl;
+      bump_impl = BumpImpl;
+    }
 
   private:
 
-    PlainSwitchController(const PlainSwitchController&);
+    static bool ToggleImpl(SwitchController* controller, bool state) {
+      PlainSwitchController<BackendT>* that = static_cast<PlainSwitchController<BackendT>* >(controller);
 
-    PlainSwitchController& operator=(const PlainSwitchController);
+      return that->backend.Toggle(state);
+    }
 
-    SwitchBackend& backend;
+    static bool BumpImpl(SwitchController* controller) {
+      return false;
+    }
+
+    BackendT& backend;
 };
 
 
-class StickySwitchController : public SwitchController {
+template<class BackendT> class StickySwitchController : public SwitchController {
   public:
 
-    StickySwitchController(SwitchBackend& backend);
-
-    virtual bool Toggle(bool state);
-
-    virtual bool Bump();
+    StickySwitchController(BackendT& backend) : backend(backend), state(false) {
+      toggle_impl = ToggleImpl;
+      bump_impl = BumpImpl;
+    }
 
   private:
 
-    StickySwitchController(const StickySwitchController&);
+    static bool ToggleImpl(SwitchController* controller, bool state) {
+      StickySwitchController<BackendT>* that = static_cast<StickySwitchController<BackendT>* >(controller);
 
-    StickySwitchController& operator=(const StickySwitchController);
+      bool success = that->backend.Toggle(state);
 
-    SwitchBackend& backend;
+      if (success) that->state = state;
+
+      return success;
+    }
+
+
+    static bool BumpImpl(SwitchController* controller) {
+      StickySwitchController<BackendT>* that = static_cast<StickySwitchController<BackendT>* >(controller);
+
+        logging::traceln(F("bumping switch state... "));
+
+        that->backend.Toggle(that->state);
+
+        return true;
+    }
+
+
+    BackendT& backend;
 
     bool state;
 };

@@ -44,29 +44,26 @@
 #include "switch_controller.h"
 
 EthernetServer server(SERVER_PORT);
-SwitchCollection* switch_collection;
+SwitchCollection<4> switch_collection;
 
-template<class ControllerT, unsigned int index> SwitchController* allocate_switch(RCSwitch& rc_switch) {
-  static CustomSwitch1 backend(rc_switch);
+template<class ControllerT, unsigned int index> void add_switch() {
+  static CustomSwitch1<index> backend;
   static ControllerT controller(backend);
 
-  backend.Index(index);
-
-  return &controller;
+  switch_collection.SetSwitch(&controller, index);
 }
 
 
 void initialize_switches(RCSwitch& rc_switch) {
-  static SwitchController* switches[4];
+  CustomSwitch1Impl::SetRCSwitch(&rc_switch);
 
-  switches[0] = allocate_switch<PlainSwitchController, 0>(rc_switch);
-  switches[1] = allocate_switch<PlainSwitchController, 1>(rc_switch);
-  switches[2] = allocate_switch<StickySwitchController, 2>(rc_switch);
-  switches[3] = allocate_switch<StickySwitchController, 3>(rc_switch);
+  add_switch<PlainSwitchController<CustomSwitch1<0> >, 0>();
 
-  static SwitchCollection collection(switches, 4);
+  add_switch<PlainSwitchController<CustomSwitch1<1> >, 1>();
 
-  switch_collection = &collection;
+  add_switch<StickySwitchController<CustomSwitch1<2> >, 2>();
+
+  add_switch<StickySwitchController<CustomSwitch1<3> >, 3>();
 }
 
 
@@ -95,10 +92,10 @@ Response& handle_request(HttpParser& parser) {
   if (!url_parser.AtEnd()) return response_not_found;
   
   if (strcmp_P(buffer, PSTR("on")) == 0) {
-    if (!switch_collection->Toggle(switch_index, true)) return response_not_found;
+    if (!switch_collection.Toggle(switch_index, true)) return response_not_found;
 
   } else if (strcmp_P(buffer, PSTR("off")) == 0) {
-    if (!switch_collection->Toggle(switch_index, false)) return response_not_found;
+    if (!switch_collection.Toggle(switch_index, false)) return response_not_found;
 
   } else {
     return response_not_found;
@@ -207,6 +204,6 @@ void loop() {
   } else if (util::time_delta(last_thunk_timestamp) > SWITCH_THUNK_INTERVAL) {
     last_thunk_timestamp = millis();
 
-    switch_collection->Bump();
+    switch_collection.Bump();
   }
 }
