@@ -48,7 +48,7 @@ template<unsigned int N> class SwitchCollection {
       bool success = false;
 
       while (!success && tries++ < N) {
-        last_bump_index = (last_bump_index + 1) % switch_count;
+        last_bump_index = (last_bump_index + 1) % N;
 
         logging::trace(F("bumping switch at index "));
         logging::traceln(last_bump_index);
@@ -70,7 +70,7 @@ template<unsigned int N> class SwitchCollection {
     SwitchCollection& operator=(SwitchCollection&);
 
     SwitchController* switches[N];
-    uint8_t switch_count;
+
     uint8_t last_bump_index;
 };
 

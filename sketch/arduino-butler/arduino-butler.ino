@@ -184,7 +184,7 @@ void setup() {
 
 
 void loop() {
-  static uint16_t last_bump_timestamp = 0;
+  static uint32_t last_bump_timestamp = 0;
 
   EthernetClient client = server.available();
   
