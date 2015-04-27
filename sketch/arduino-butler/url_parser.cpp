@@ -56,6 +56,7 @@ bool UrlParser::NextPathElement(char* buffer, size_t buffer_size) {
 
   pos = current_pos;
 
+  logging::traceTS();
   logging::trace(F("Path fragment: "));
   logging::traceln<const char*>(element);
 

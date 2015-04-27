@@ -122,6 +122,9 @@ void parse_request(HttpParser& parser, EthernetClient& client) {
     ) {
       char buffer[REQUEST_TRANSFER_BUFFER_SIZE];
 
+      logging::traceTS();
+      logging::traceln(F("reading..."));
+
       size_t bytes_to_read =
         bytes_available > REQUEST_TRANSFER_BUFFER_SIZE ?
         REQUEST_TRANSFER_BUFFER_SIZE :
@@ -129,6 +132,7 @@ void parse_request(HttpParser& parser, EthernetClient& client) {
 
       size_t bytes_read = client.readBytes(buffer, bytes_to_read);
 
+      logging::traceTS();
       logging::trace(F("pushing "));
       logging::trace(bytes_read);
       logging::traceln(F(" bytes to http parser"));
@@ -140,6 +144,7 @@ void parse_request(HttpParser& parser, EthernetClient& client) {
   }
   
   if (util::time_delta(timestamp) > REQUEST_TIMEOUT) {
+    logging::logTS();
     logging::logln(F("Request timeout"));
     
     parser.Abort();
@@ -178,6 +183,7 @@ void setup() {
   Ethernet.begin(macAddress, ip);
   server.begin();
   
+  logging::logTS();
   logging::log(F("Server listening at "));
   logging::logln(Ethernet.localIP());
 }
@@ -189,6 +195,7 @@ void loop() {
   EthernetClient client = server.available();
   
   if (client) {
+    logging::logTS();
     logging::logln(F("Incoming connection..."));
     
     HttpParser parser;

@@ -120,6 +120,7 @@ template<class BackendT> class StickySwitchController : public BaseSwitchControl
     static bool BumpImpl(SwitchController* controller) {
       StickySwitchController<BackendT>* that = static_cast<StickySwitchController<BackendT>* >(controller);
 
+        logging::traceTS();
         logging::traceln(F("bumping switch state... "));
 
         that->backend.Toggle(that->state);

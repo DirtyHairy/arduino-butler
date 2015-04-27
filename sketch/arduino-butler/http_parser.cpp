@@ -46,6 +46,7 @@ HttpParser& HttpParser::PushChar(char character) {
       if (is_terminator) {
         SetState(STATE_FAIL);
       } else if (character == ' ') {
+        logging::traceTS();
         logging::trace(F("Request Method: "));
         logging::traceln<const char*>(method);
         
@@ -59,6 +60,7 @@ HttpParser& HttpParser::PushChar(char character) {
       if (is_terminator) {
         SetState(STATE_FAIL);
       } else if (character == ' ') {
+        logging::traceTS();
         logging::trace(F("Request Route: "));
         logging::traceln<const char*>(route);
         
@@ -71,6 +73,7 @@ HttpParser& HttpParser::PushChar(char character) {
 
     case STATE_REQUEST_PROTOCOL:
       if (is_terminator) {
+        logging::traceTS();
         logging::trace(F("Request Protocol: "));
         logging::traceln<const char*>(protocol);
         
@@ -84,6 +87,7 @@ HttpParser& HttpParser::PushChar(char character) {
       if (is_terminator) {
         SetState(header_name.Length() == 0 ? STATE_SUCCESS : STATE_FAIL);
       } else if (character == ':') {
+        logging::traceTS();
         logging::trace(F("Header Name: "));
         logging::traceln<const char*>(header_name);
         
@@ -95,6 +99,7 @@ HttpParser& HttpParser::PushChar(char character) {
       
     case STATE_HEADER_VALUE:
       if (is_terminator) {
+        logging::traceTS();
         logging::trace(F("Header Value: "));
         logging::traceln<const char*>(header_value);
         

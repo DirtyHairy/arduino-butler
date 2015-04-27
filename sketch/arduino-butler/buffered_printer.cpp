@@ -39,6 +39,7 @@ BufferedPrinter::BufferedPrinter(uint8_t* buffer, size_t buffer_size, Print& bac
 
 size_t BufferedPrinter::write(uint8_t value) {
   if (idx == buffer_size) {
+    logging::logTS();
     logging::traceln(F("buffer full, flushing..."));
     flush();
   }
@@ -53,8 +54,14 @@ void BufferedPrinter::flush() {
   size_t offset = 0;
 
   while (idx > 0 && util::time_delta(timestamp) <= timeout) {
+    logging::traceTS();
+    logging::trace(F("flushing "));
+    logging::trace(idx);
+    logging::traceln(F(" bytes"));
+
     uint16_t bytes_written = backend.write(buffer + offset, idx);
 
+    logging::traceTS();
     logging::trace(F("flushed "));
     logging::trace(bytes_written);
     logging::traceln(F(" bytes"));

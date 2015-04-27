@@ -48,6 +48,7 @@ CustomSwitch1& CustomSwitch1::Index(uint8_t index) {
 
 
 bool CustomSwitch1::Toggle(bool state) {
+  logging::logTS();
   logging::log(F("Toggle switch "));
   logging::log(index);
   logging::logln(state ? F(" on") : F(" off"));
@@ -75,12 +76,20 @@ bool CustomSwitch1::Toggle(bool state) {
 
   if (!state) code[11] = '0';
 
+  logging::traceTS();
   logging::trace(F("Sending code "));
   logging::traceln(code);
 
   for (uint8_t i = 0; i < SEND_REPEAT; i++) {
     if (i) delay(SEND_REPEAT_DELAY);
+
+    logging::traceTS();
+    logging::traceln(F("sending..."));
+
     rc_switch->sendTriState(code);
+
+    logging::traceTS();
+    logging::traceln(F("code sent!"));
   }
 
   return true;
