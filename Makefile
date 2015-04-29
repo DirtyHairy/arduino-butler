@@ -8,7 +8,6 @@ GO_PACKAGES = server server/ip
 
 GARBAGE = $(GO_BUILDDIR)
 
-
 packages = $(GO_PACKAGES:%=$(GO_PACKAGE_PREFIX)/$(GO_SRCDIR)/%)
 execute_go = GOPATH=`pwd`/$(GO_BUILDDIR) $(GO) $(1) $(2) $(packages)
 
@@ -30,4 +29,4 @@ $(GO_BUILDDIR):
 clean:
 	-rm -fr $(GARBAGE)
 
-.PHONY: clean all $(GO_PACKAGES)
+.PHONY: clean all install fmt goclean
