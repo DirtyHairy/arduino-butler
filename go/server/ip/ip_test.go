@@ -1,7 +1,6 @@
 package ip
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -9,7 +8,7 @@ func assertInvalid(address string, t *testing.T) {
 	ip := Create()
 
 	if err := ip.Set(address); err == nil {
-		t.Error(fmt.Sprintf("'%s' should be rejected", address))
+		t.Errorf("'%s' should be rejected", address)
 	}
 }
 
@@ -17,7 +16,7 @@ func assertValid(address string, t *testing.T) {
 	ip := Create()
 
 	if err := ip.Set(address); err != nil {
-		t.Error(fmt.Sprintf("'%s' should be accepted, go %v instead", address, err))
+		t.Errorf("'%s' should be accepted, got %v instead", address, err)
 	}
 }
 
