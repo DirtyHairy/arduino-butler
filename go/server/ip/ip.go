@@ -2,28 +2,28 @@ package ip
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"regexp"
 	"strconv"
 )
 
-type T interface {
-	flag.Value
-}
+type T string
 
-type implementation string
-
-func (ip implementation) String() string {
+func (ip T) String() string {
 	return string(ip)
 }
 
-func (ip *implementation) Set(value string) error {
+func (ip *T) Set(value string) error {
 	if value == "" {
 		return nil
 	}
 
-	rx, _ := regexp.Compile("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$")
+	rx, err := regexp.Compile("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$")
+
+	if err != nil {
+		panic(err)
+	}
+
 	matches := rx.FindStringSubmatch(value)
 
 	if matches == nil {
@@ -38,13 +38,13 @@ func (ip *implementation) Set(value string) error {
 		}
 	}
 
-	*ip = implementation(value)
+	*ip = T(value)
 
 	return nil
 }
 
 func Create() T {
-	ip := implementation("")
+	ip := T("")
 
-	return &ip
+	return ip
 }

@@ -22,6 +22,9 @@ fmt: $(GO_BUILDDIR)
 goclean: $(GO_BUILDDIR)
 	$(call execute_go,clean)
 
+test: $(GO_BUILDDIR)
+	$(call execute_go,test)
+
 $(GO_BUILDDIR):
 	mkdir -p ./$(GO_BUILDDIR)/src/$(GO_PACKAGE_PREFIX)
 	ln -s `pwd`/$(GO_SRCDIR) ./$(GO_BUILDDIR)/src/$(GO_PACKAGE_PREFIX)/$(GO_SRCDIR)
@@ -29,4 +32,4 @@ $(GO_BUILDDIR):
 clean:
 	-rm -fr $(GARBAGE)
 
-.PHONY: clean all install fmt goclean
+.PHONY: clean all install fmt goclean test

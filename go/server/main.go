@@ -20,7 +20,7 @@ func parseCommandline() configBag {
 
 	ip := ip.Create()
 
-	flag.Var(ip, "i", "server listen IP")
+	flag.Var(&ip, "i", "server listen IP")
 	flag.IntVar(&config.port, "p", 8888, "server listen port")
 	flag.StringVar(&config.frontendPath, "f", "./frontend", "path to frontend")
 	flag.Parse()
@@ -51,7 +51,7 @@ func main() {
 	}()
 
 	if err := <-controlChan; err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
