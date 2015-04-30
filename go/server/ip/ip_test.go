@@ -58,10 +58,10 @@ func TestValidIp1(t *testing.T) {
 }
 
 func TestSerialization(t *testing.T) {
-    ip := Create()
-    ip.Set("127.0.0.1")
+	ip := Create()
+	ip.Set("127.0.0.1")
 
-    if ip.String() != "127.0.0.1" {
-        t.Error("Serialization should return the IP")
-    }
+	if ip.String() != "127.0.0.1" {
+		t.Error("Serialization should return the IP")
+	}
 }
