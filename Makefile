@@ -1,5 +1,6 @@
 GO ?= go
 GO_BUILDFLAGS = -v
+GO_TESTFLAGS = -cover
 
 GO_BUILDDIR = ./build
 GO_SRCDIR = go
@@ -23,7 +24,7 @@ goclean: $(GO_BUILDDIR)
 	$(call execute_go,clean)
 
 test: $(GO_BUILDDIR)
-	$(call execute_go,test)
+	$(call execute_go,test,$(GO_TESTFLAGS))
 
 $(GO_BUILDDIR):
 	mkdir -p ./$(GO_BUILDDIR)/src/$(GO_PACKAGE_PREFIX)
