@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/DirtyHairy/arduino-butler/go/server/ip"
+	"github.com/DirtyHairy/arduino-butler/go/util/ip"
 	"net/http"
 	"os"
 	"strconv"

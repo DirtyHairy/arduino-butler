@@ -5,7 +5,10 @@ GO_TESTFLAGS = -cover
 GO_BUILDDIR = ./build
 GO_SRCDIR = go
 GO_PACKAGE_PREFIX = github.com/DirtyHairy/arduino-butler
-GO_PACKAGES = server server/ip
+GO_PACKAGES = server util/ip util
+
+GIT = git
+GIT_COMMITFLAGS = -a
 
 GARBAGE = $(GO_BUILDDIR)
 
@@ -25,6 +28,9 @@ goclean: $(GO_BUILDDIR)
 
 test: $(GO_BUILDDIR)
 	$(call execute_go,test,$(GO_TESTFLAGS))
+
+commit: fmt
+	$(GIT) commit $(GIT_COMMITFLAGS)
 
 $(GO_BUILDDIR):
 	mkdir -p ./$(GO_BUILDDIR)/src/$(GO_PACKAGE_PREFIX)

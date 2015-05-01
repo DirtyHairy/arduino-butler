@@ -3,7 +3,7 @@ package ip
 import (
 	"errors"
 	"fmt"
-	"regexp"
+	"github.com/DirtyHairy/arduino-butler/go/util"
 	"strconv"
 )
 
@@ -18,11 +18,7 @@ func (ip *T) Set(value string) error {
 		return nil
 	}
 
-	rx, err := regexp.Compile("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$")
-
-	if err != nil {
-		panic(err)
-	}
+	rx := util.CompileRegex("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$")
 
 	matches := rx.FindStringSubmatch(value)
 
