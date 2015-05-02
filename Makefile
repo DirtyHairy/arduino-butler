@@ -5,7 +5,7 @@ GO_TESTFLAGS = -cover
 GO_BUILDDIR = ./build
 GO_SRCDIR = go
 GO_PACKAGE_PREFIX = github.com/DirtyHairy/arduino-butler
-GO_PACKAGES = server util/ip util mockduino
+GO_PACKAGES = server util/ip util mockduino util/router util/mocks
 
 GIT = git
 GIT_COMMITFLAGS = -a
