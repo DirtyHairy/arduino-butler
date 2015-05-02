@@ -29,6 +29,9 @@ goclean: $(GO_BUILDDIR)
 test: $(GO_BUILDDIR)
 	$(call execute_go,test,$(GO_TESTFLAGS))
 
+vet: $(GO_BUILDDIR)
+	$(call execute_go,vet)
+
 commit: fmt
 	$(GIT) commit $(GIT_COMMITFLAGS)
 

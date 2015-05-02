@@ -203,10 +203,15 @@ void loop() {
     parse_request(parser, client);
 
     send_response(handle_request(parser), client);
- 
+    client.flush();
+
     delay(CLIENT_CLOSE_GRACE_TIME);
  
     client.stop(); 
+
+    while (client.status()) {
+      delay(5);
+    }
 
   } else if (util::time_delta(last_bump_timestamp) > SWITCH_BUMP_INTERVAL) {
     last_bump_timestamp = millis();
