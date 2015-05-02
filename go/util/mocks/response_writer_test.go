@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var response *MockResponseWriter
+var response MockResponseWriter
 
 func TestHeaders(t *testing.T) {
 	header := response.Header()

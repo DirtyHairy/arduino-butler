@@ -43,7 +43,7 @@ func TestRoute1(t *testing.T) {
 	request.URL, _ = url.Parse("/foo/bar/1")
 	response := mocks.CreateMockResponseWriter()
 
-	router.ServeHTTP(response, &request)
+	router.ServeHTTP(&response, &request)
 
 	if state.handler1Called != 1 {
 		t.Error("Handler 1 should have been called")
@@ -68,7 +68,7 @@ func TestRoute2(t *testing.T) {
 	request.URL, _ = url.Parse("/bar/foo/2")
 	response := mocks.CreateMockResponseWriter()
 
-	router.ServeHTTP(response, &request)
+	router.ServeHTTP(&response, &request)
 
 	if state.handler1Called != 0 {
 		t.Error("Handler 1 should not have been called")
@@ -93,7 +93,7 @@ func TestInvalidRoute(t *testing.T) {
 	request.URL, _ = url.Parse("/bar/foo/")
 	response := mocks.CreateMockResponseWriter()
 
-	router.ServeHTTP(response, &request)
+	router.ServeHTTP(&response, &request)
 
 	if state.handler1Called != 0 {
 		t.Error("Handler 2 should not have been called")

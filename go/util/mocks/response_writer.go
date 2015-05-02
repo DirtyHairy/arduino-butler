@@ -19,6 +19,6 @@ func (rw *MockResponseWriter) WriteHeader(code int) {
 	rw.Code = code
 }
 
-func CreateMockResponseWriter() *MockResponseWriter {
-	return &MockResponseWriter{make(map[string][]string), -1}
+func CreateMockResponseWriter() MockResponseWriter {
+	return MockResponseWriter{make(map[string][]string), -1}
 }
