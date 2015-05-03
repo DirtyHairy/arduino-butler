@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/DirtyHairy/arduino-butler/go/util/mocks"
+	"github.com/DirtyHairy/arduino-butler/go/util/mock"
 	"net/http"
 	"net/url"
 	"testing"
@@ -41,7 +41,7 @@ func TestRoute1(t *testing.T) {
 
 	var request http.Request
 	request.URL, _ = url.Parse("/foo/bar/1")
-	response := mocks.CreateMockResponseWriter()
+	response := mock.CreateMockResponseWriter()
 
 	router.ServeHTTP(&response, &request)
 
@@ -66,7 +66,7 @@ func TestRoute2(t *testing.T) {
 
 	var request http.Request
 	request.URL, _ = url.Parse("/bar/foo/2")
-	response := mocks.CreateMockResponseWriter()
+	response := mock.CreateMockResponseWriter()
 
 	router.ServeHTTP(&response, &request)
 
@@ -91,7 +91,7 @@ func TestInvalidRoute(t *testing.T) {
 
 	var request http.Request
 	request.URL, _ = url.Parse("/bar/foo/")
-	response := mocks.CreateMockResponseWriter()
+	response := mock.CreateMockResponseWriter()
 
 	router.ServeHTTP(&response, &request)
 

@@ -34,6 +34,12 @@ angular.module('toggles', ['ui.bootstrap'])
         }, {
             name: 'Essecke',
             index: 1
+        }, {
+            name: 'Steckdose #3',
+            index: 2
+        }, {
+            name: 'Steckdose #4',
+            index: 3
         }
     ])
     .controller('socketController', ['$http', '$scope', 'sockets', function($http, $scope, sockets) {
@@ -41,7 +47,7 @@ angular.module('toggles', ['ui.bootstrap'])
         $scope.sockets = sockets;
 
         this.toggle = function(index, state) {
-            $http.get('http://butler/socket/' + index + '/' + (state ? 'on' : 'off'));
+            $http.get('/api/switch/' + index + '/' + (state ? 'on' : 'off'));
         };
 
     }]);
