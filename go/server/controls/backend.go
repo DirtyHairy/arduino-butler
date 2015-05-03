@@ -2,7 +2,7 @@ package controls
 
 import (
 	"fmt"
-	"github.com/DirtyHairy/arduino-butler/go/util/emptyreader"
+	"github.com/DirtyHairy/arduino-butler/go/util"
 	"net/http"
 	"time"
 )
@@ -49,7 +49,7 @@ func switchCommandProcessor(controlHost string) {
 		url := fmt.Sprintf("http://%s/socket/%d/%s", controlHost, cmd.Index, toggleCmd)
 
 		fmt.Printf("POSTing to %s\n", url)
-		resp, err := httpClient.Post(url, "application/text", emptyreader.EmptyReader)
+		resp, err := httpClient.Post(url, "application/text", util.EmptyReader)
 
 		switch {
 		case err != nil:
