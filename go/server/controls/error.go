@@ -1,10 +1,10 @@
 package controls
 
-type SwitchNotFoundError string
+type ControlNotFoundError string
 
 type ExecError string
 
-func (err SwitchNotFoundError) Error() string {
+func (err ControlNotFoundError) Error() string {
 	return string(err)
 }
 
