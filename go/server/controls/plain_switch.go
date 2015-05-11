@@ -61,6 +61,15 @@ func (s* PlainSwitch) Stop() error {
     return s.runner.Stop()
 }
 
+func (s* PlainSwitch) Marshal() MarshalledSwitch {
+    return MarshalledSwitch{
+        Id: s.id,
+        Type: "plain",
+        BackendId: s.backend.Id(),
+        BackendIndex: s.backendIdx,
+    }
+}
+
 func CreatePlainSwitch(backendIdx uint) *PlainSwitch {
     swtch := PlainSwitch{
         backendIdx: backendIdx,

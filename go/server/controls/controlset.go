@@ -109,3 +109,21 @@ func (set *ControlSet) GetSwitch(id string) Switch {
         return nil
     }
 }
+
+func (set *ControlSet) Marshal() MarshalledControlSet {
+    marshalledBackends := make([]MarshalledBackend, 0, len(set.backends))
+    marshalledSwitches := make([]MarshalledSwitch, 0, len(set.switches))
+
+    for _, backend := range set.backends {
+        marshalledBackends = append(marshalledBackends, backend.Marshal())
+    }
+
+    for _, swtch := range set.switches {
+        marshalledSwitches = append(marshalledSwitches, swtch.Marshal())
+    }
+
+    return MarshalledControlSet{
+        Backends: marshalledBackends,
+        Switches: marshalledSwitches,
+    }
+}

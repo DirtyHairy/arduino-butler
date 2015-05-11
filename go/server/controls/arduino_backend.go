@@ -82,6 +82,14 @@ func (backend *ArduinoBackend) setId(id string) {
     backend.id = id
 }
 
+func (backend *ArduinoBackend) Marshal() MarshalledBackend {
+    return MarshalledBackend{
+        Id: backend.id,
+        Host: backend.host,
+        Type: "arduino",
+    }
+}
+
 func CreateArduinoBackend(host string) *ArduinoBackend {
     backend := ArduinoBackend{
         host: host,

@@ -10,6 +10,8 @@ type Switch interface {
 
     setBackend(Backend) error
     setId(string)
+
+    Marshal() MarshalledSwitch
 }
 
 type Backend interface {
@@ -20,4 +22,6 @@ type Backend interface {
     Stop() error
 
     Toggle(switchIdx uint, state bool) error
+
+    Marshal() MarshalledBackend
 }

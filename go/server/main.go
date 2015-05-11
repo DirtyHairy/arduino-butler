@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+    "encoding/json"
 )
 
 type configBag struct {
@@ -70,6 +71,20 @@ func handleSwitch(response http.ResponseWriter, request *http.Request, matches [
 	}
 }
 
+func getStructure(response http.ResponseWriter, request *http.Request, matches []string) {
+    marshalledControlSet := controlSet.Marshal()
+
+    serializedControlSet, err := json.MarshalIndent(marshalledControlSet, "", "  ")
+
+    if err != nil {
+        response.WriteHeader(http.StatusInternalServerError)
+    } else {
+        response.WriteHeader(http.StatusOK)
+        response.Header().Add("content-type", "application/json")
+        response.Write(serializedControlSet)
+    }
+}
+
 func main() {
 	config := parseCommandline()
 
@@ -86,6 +101,7 @@ func main() {
 
 	router := routerPkg.CreateRouter(10)
 	router.AddRoute("^/api/switch/(\\w+)/(on|off)$", routerPkg.HandlerFunction(handleSwitch))
+	router.AddRoute("^/api/structure$", routerPkg.HandlerFunction(getStructure))
 
 	http.Handle("/", http.FileServer(http.Dir(config.frontendPath)))
 	http.Handle("/api/", router)
