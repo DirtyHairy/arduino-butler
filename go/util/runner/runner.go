@@ -1,65 +1,65 @@
 package runner
 
 type T struct {
-    commandChannel chan cmdWrapper
-    controlChannel chan int
+	commandChannel chan cmdWrapper
+	controlChannel chan int
 
-    Execute func(interface{}) error
+	Execute func(interface{}) error
 }
 
 type cmdWrapper struct {
-    cmd interface{}
-    resultChannel chan error
+	cmd           interface{}
+	resultChannel chan error
 }
 
 func (runner *T) Start() error {
-    if runner.commandChannel != nil {
-        return Error("already started")
-    }
+	if runner.commandChannel != nil {
+		return Error("already started")
+	}
 
-    runner.commandChannel = make(chan cmdWrapper)
-    runner.controlChannel = make(chan int)
+	runner.commandChannel = make(chan cmdWrapper)
+	runner.controlChannel = make(chan int)
 
-    go func() {
-        for {
-            cmd, ok := <-runner.commandChannel
+	go func() {
+		for {
+			cmd, ok := <-runner.commandChannel
 
-            if (!ok) {
-                break
-            }
+			if !ok {
+				break
+			}
 
-            cmd.resultChannel <- runner.Execute(cmd.cmd)
-        }
+			cmd.resultChannel <- runner.Execute(cmd.cmd)
+		}
 
-        runner.controlChannel <- 1
-    }()
+		runner.controlChannel <- 1
+	}()
 
-    return nil
+	return nil
 }
 
 func (runner *T) Stop() error {
-    if runner.commandChannel == nil {
-        return Error("already stopped")
-    }
+	if runner.commandChannel == nil {
+		return Error("already stopped")
+	}
 
-    close (runner.commandChannel)
+	close(runner.commandChannel)
 
-    _ = <-runner.controlChannel
+	_ = <-runner.controlChannel
 
-    runner.commandChannel = nil
-    runner.controlChannel = nil
+	runner.commandChannel = nil
+	runner.controlChannel = nil
 
-    return nil
+	return nil
 }
 
 func (runner *T) Dispatch(cmd interface{}) error {
-    if runner.commandChannel == nil {
-        return Error("not running")
-    }
+	if runner.commandChannel == nil {
+		return Error("not running")
+	}
 
-    resultChannel := make(chan error)
+	resultChannel := make(chan error)
 
-    runner.commandChannel <- cmdWrapper{cmd, resultChannel}
+	runner.commandChannel <- cmdWrapper{cmd, resultChannel}
 
-    return <-resultChannel
+	return <-resultChannel
 }

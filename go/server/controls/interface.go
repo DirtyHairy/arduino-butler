@@ -1,29 +1,29 @@
 package controls
 
 type Switch interface {
-    Toggle(state bool) error
-    Name() string
-    Id() string
+	Toggle(state bool) error
+	Name() string
+	Id() string
 
-    SetName(name string)
+	SetName(name string)
 
-    Start() error
-    Stop() error
+	Start() error
+	Stop() error
 
-    setBackend(Backend) error
-    setId(string)
+	setBackend(Backend) error
+	setId(string)
 
-    Marshal() MarshalledSwitch
+	Marshal() MarshalledSwitch
 }
 
 type Backend interface {
-    Id() string
-    setId(string)
+	Id() string
+	setId(string)
 
-    Start() error
-    Stop() error
+	Start() error
+	Stop() error
 
-    Toggle(switchIdx uint, state bool) error
+	Toggle(switchIdx uint, state bool) error
 
-    Marshal() MarshalledBackend
+	Marshal() MarshalledBackend
 }

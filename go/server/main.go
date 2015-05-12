@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/DirtyHairy/arduino-butler/go/server/controls"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-    "encoding/json"
 )
 
 type configBag struct {
@@ -44,16 +44,16 @@ func handleSwitch(response http.ResponseWriter, request *http.Request, matches [
 	switchId := matches[1]
 	state := matches[2] == "on"
 
-    swtch := controlSet.GetSwitch(switchId)
-    var err error
+	swtch := controlSet.GetSwitch(switchId)
+	var err error
 
-    if swtch != nil {
-        err = swtch.Toggle(state)
-    } else {
-        fmt.Print("no such switch\n")
-        response.WriteHeader(http.StatusNotFound)
-        return
-    }
+	if swtch != nil {
+		err = swtch.Toggle(state)
+	} else {
+		fmt.Print("no such switch\n")
+		response.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
@@ -72,22 +72,22 @@ func handleSwitch(response http.ResponseWriter, request *http.Request, matches [
 }
 
 func getStructure(response http.ResponseWriter, request *http.Request, matches []string) {
-    marshalledControlSet := controlSet.Marshal()
+	marshalledControlSet := controlSet.Marshal()
 
-    serializedControlSet, err := json.MarshalIndent(marshalledControlSet, "", "  ")
+	serializedControlSet, err := json.MarshalIndent(marshalledControlSet, "", "  ")
 
-    if err != nil {
-        response.WriteHeader(http.StatusInternalServerError)
-    } else {
-        header := response.Header()
-        header.Add("content-type", "application/json")
-        header.Add("cache-control", "no-cache, no-store, must-revalidate")
-        header.Add("pragma", "no-cache")
-        header.Add("expires", "0")
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+	} else {
+		header := response.Header()
+		header.Add("content-type", "application/json")
+		header.Add("cache-control", "no-cache, no-store, must-revalidate")
+		header.Add("pragma", "no-cache")
+		header.Add("expires", "0")
 
-        response.WriteHeader(http.StatusOK)
-        response.Write(serializedControlSet)
-    }
+		response.WriteHeader(http.StatusOK)
+		response.Write(serializedControlSet)
+	}
 }
 
 func main() {
@@ -95,21 +95,21 @@ func main() {
 
 	listenAddress := config.ip + ":" + strconv.Itoa(config.port)
 
-    controlSet = controls.CreateControlSet()
+	controlSet = controls.CreateControlSet()
 
-    controlSet.AddBackend(controls.CreateArduinoBackend(config.controlHost), "arduino1")
+	controlSet.AddBackend(controls.CreateArduinoBackend(config.controlHost), "arduino1")
 
-    controlSet.AddSwitch(controls.CreatePlainSwitch(0), "buffet", "arduino1")
-    controlSet.GetSwitch("buffet").SetName("Wohnzimmerbuffet")
+	controlSet.AddSwitch(controls.CreatePlainSwitch(0), "buffet", "arduino1")
+	controlSet.GetSwitch("buffet").SetName("Wohnzimmerbuffet")
 
-    controlSet.AddSwitch(controls.CreatePlainSwitch(1), "essecke", "arduino1")
-    controlSet.GetSwitch("essecke").SetName("Essecke")
+	controlSet.AddSwitch(controls.CreatePlainSwitch(1), "essecke", "arduino1")
+	controlSet.GetSwitch("essecke").SetName("Essecke")
 
-    controlSet.AddSwitch(controls.CreatePlainSwitch(2), "leselicht", "arduino1")
-    controlSet.GetSwitch("leselicht").SetName("Leselicht Sofa")
+	controlSet.AddSwitch(controls.CreatePlainSwitch(2), "leselicht", "arduino1")
+	controlSet.GetSwitch("leselicht").SetName("Leselicht Sofa")
 
-    controlSet.AddSwitch(controls.CreatePlainSwitch(3), "ecke", "arduino1")
-    controlSet.GetSwitch("ecke").SetName("Ecke bei den Gitarren")
+	controlSet.AddSwitch(controls.CreatePlainSwitch(3), "ecke", "arduino1")
+	controlSet.GetSwitch("ecke").SetName("Ecke bei den Gitarren")
 
 	router := routerPkg.CreateRouter(10)
 	router.AddRoute("^/api/switch/(\\w+)/(on|off)$", routerPkg.HandlerFunction(handleSwitch))
@@ -121,10 +121,10 @@ func main() {
 	fmt.Printf("Frontend served from %s\n", config.frontendPath)
 	fmt.Printf("Server listening on %s\n", listenAddress)
 
-    if err := controlSet.Start(); err != nil {
-        panic(fmt.Sprintf("failed to start controls: %v", err))
-    }
-    defer controlSet.Stop()
+	if err := controlSet.Start(); err != nil {
+		panic(fmt.Sprintf("failed to start controls: %v", err))
+	}
+	defer controlSet.Stop()
 
 	if err := http.ListenAndServe(listenAddress, nil); err != nil {
 		fmt.Println(err)

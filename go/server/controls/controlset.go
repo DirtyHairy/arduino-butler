@@ -1,129 +1,129 @@
 package controls
 
 import (
-    "fmt"
-    "errors"
+	"errors"
+	"fmt"
 )
 
 type toggleCommand struct {
-    switchId string
-    state bool
+	switchId string
+	state    bool
 }
 
 type ControlSet struct {
-    backends map[string] Backend
-    switches map[string] Switch
+	backends map[string]Backend
+	switches map[string]Switch
 }
 
 func CreateControlSet() *ControlSet {
-    controls := ControlSet{
-        backends: make(map[string] Backend),
-        switches: make(map[string] Switch),
-    }
+	controls := ControlSet{
+		backends: make(map[string]Backend),
+		switches: make(map[string]Switch),
+	}
 
-    return &controls
+	return &controls
 }
 
 func (set *ControlSet) AddBackend(backend Backend, id string) error {
-    if _, ok := set.backends[id]; ok {
-        return errors.New(fmt.Sprintf("backend '%s' already defined", id))
-    }
+	if _, ok := set.backends[id]; ok {
+		return errors.New(fmt.Sprintf("backend '%s' already defined", id))
+	}
 
-    backend.setId(id)
+	backend.setId(id)
 
-    set.backends[id] = backend
-    return nil
+	set.backends[id] = backend
+	return nil
 }
 
 func (set *ControlSet) AddSwitch(swtch Switch, id string, backendId string) error {
-    if _, ok := set.switches[id]; ok {
-        return errors.New(fmt.Sprintf("switch '%s' already defined", id))
-    }
+	if _, ok := set.switches[id]; ok {
+		return errors.New(fmt.Sprintf("switch '%s' already defined", id))
+	}
 
-    b, ok := set.backends[backendId]
-    if !ok {
-        return errors.New(fmt.Sprintf("backend '%s' is undefined", backendId))
-    }
+	b, ok := set.backends[backendId]
+	if !ok {
+		return errors.New(fmt.Sprintf("backend '%s' is undefined", backendId))
+	}
 
-    if err := swtch.setBackend(b); err != nil {
-        return err
-    }
+	if err := swtch.setBackend(b); err != nil {
+		return err
+	}
 
-    swtch.setId(id)
+	swtch.setId(id)
 
-    set.switches[id] = swtch
-    return nil
+	set.switches[id] = swtch
+	return nil
 }
 
-func (set* ControlSet) Start() error {
-    var firstError error
+func (set *ControlSet) Start() error {
+	var firstError error
 
-    for _, b := range(set.backends) {
-        err := b.Start()
+	for _, b := range set.backends {
+		err := b.Start()
 
-        if firstError == nil {
-            firstError = err
-        }
-    }
+		if firstError == nil {
+			firstError = err
+		}
+	}
 
-    for _, s := range(set.switches) {
-        err := s.Start()
+	for _, s := range set.switches {
+		err := s.Start()
 
-        if firstError == nil {
-            firstError = err
-        }
-    }
+		if firstError == nil {
+			firstError = err
+		}
+	}
 
-    return firstError
+	return firstError
 }
 
 func (set *ControlSet) Stop() error {
-    var firstError error
+	var firstError error
 
-    for _, s := range(set.switches) {
-        err := s.Stop()
+	for _, s := range set.switches {
+		err := s.Stop()
 
-        if firstError == nil {
-            firstError = err
-        }
+		if firstError == nil {
+			firstError = err
+		}
 
-    }
+	}
 
-    for _, b := range(set.backends) {
-        err := b.Stop()
+	for _, b := range set.backends {
+		err := b.Stop()
 
-        if firstError == nil {
-            firstError = err
-        }
-    }
+		if firstError == nil {
+			firstError = err
+		}
+	}
 
-    return firstError
+	return firstError
 }
 
 func (set *ControlSet) GetSwitch(id string) Switch {
-    swtch, ok := set.switches[id]
+	swtch, ok := set.switches[id]
 
-    if (ok) {
-        return swtch
-    } else {
-        return nil
-    }
+	if ok {
+		return swtch
+	} else {
+		return nil
+	}
 }
 
 func (set *ControlSet) Marshal() MarshalledControlSet {
-    marshalledBackends := make([]MarshalledBackend, 0, len(set.backends))
-    marshalledSwitches := make([]MarshalledSwitch, 0, len(set.switches))
+	marshalledBackends := make([]MarshalledBackend, 0, len(set.backends))
+	marshalledSwitches := make([]MarshalledSwitch, 0, len(set.switches))
 
-    for _, backend := range set.backends {
-        marshalledBackends = append(marshalledBackends, backend.Marshal())
-    }
+	for _, backend := range set.backends {
+		marshalledBackends = append(marshalledBackends, backend.Marshal())
+	}
 
-    for _, swtch := range set.switches {
-        marshalledSwitches = append(marshalledSwitches, swtch.Marshal())
-    }
+	for _, swtch := range set.switches {
+		marshalledSwitches = append(marshalledSwitches, swtch.Marshal())
+	}
 
-    return MarshalledControlSet{
-        Backends: marshalledBackends,
-        Switches: marshalledSwitches,
-    }
+	return MarshalledControlSet{
+		Backends: marshalledBackends,
+		Switches: marshalledSwitches,
+	}
 }

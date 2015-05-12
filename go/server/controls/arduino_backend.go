@@ -1,102 +1,102 @@
 package controls
 
 import (
-    "net/http"
+	"fmt"
 	"github.com/DirtyHairy/arduino-butler/go/util"
 	"github.com/DirtyHairy/arduino-butler/go/util/runner"
-    "time"
-    "fmt"
+	"net/http"
+	"time"
 )
 
 type arduinoCommand struct {
-    switchIdx uint
-    state bool
- }
+	switchIdx uint
+	state     bool
+}
 
 type ArduinoBackend struct {
-    id string
+	id string
 
-    host string
-    httpClient http.Client
+	host       string
+	httpClient http.Client
 
-    runner runner.T
+	runner runner.T
 }
 
 func (backend *ArduinoBackend) execute(c interface{}) error {
-    cmd, ok := c.(arduinoCommand)
+	cmd, ok := c.(arduinoCommand)
 
-    if !ok {
-        return ExecError("invalid arduinoCommand")
-    }
+	if !ok {
+		return ExecError("invalid arduinoCommand")
+	}
 
-    toggleCmd := "on"
-    if !cmd.state {
-        toggleCmd = "off"
-    }
+	toggleCmd := "on"
+	if !cmd.state {
+		toggleCmd = "off"
+	}
 
-    if cmd.switchIdx >= 4 {
-        return ControlNotFoundError("invalid switch id")
-    }
+	if cmd.switchIdx >= 4 {
+		return ControlNotFoundError("invalid switch id")
+	}
 
-    url := fmt.Sprintf("http://%s/socket/%d/%s", backend.host, cmd.switchIdx, toggleCmd)
+	url := fmt.Sprintf("http://%s/socket/%d/%s", backend.host, cmd.switchIdx, toggleCmd)
 
-    fmt.Printf("POSTing to %s\n", url)
-    resp, err := backend.httpClient.Post(url, "application/text", util.EmptyReader)
+	fmt.Printf("POSTing to %s\n", url)
+	resp, err := backend.httpClient.Post(url, "application/text", util.EmptyReader)
 
-    if err == nil {
-        resp.Body.Close()
-    }
+	if err == nil {
+		resp.Body.Close()
+	}
 
-    switch {
-    case err != nil:
-        return err
+	switch {
+	case err != nil:
+		return err
 
-    case resp.StatusCode == 200:
-        return nil
+	case resp.StatusCode == 200:
+		return nil
 
-    case resp.StatusCode == 404:
-        return ControlNotFoundError("resource not found")
+	case resp.StatusCode == 404:
+		return ControlNotFoundError("resource not found")
 
-    default:
-        return ExecError(fmt.Sprintf("unknown request error, HTTP status %d", resp.StatusCode))
-    }
+	default:
+		return ExecError(fmt.Sprintf("unknown request error, HTTP status %d", resp.StatusCode))
+	}
 }
 
 func (backend *ArduinoBackend) Start() error {
-    return backend.runner.Start()
+	return backend.runner.Start()
 }
 
 func (backend *ArduinoBackend) Stop() error {
-    return backend.runner.Stop()
+	return backend.runner.Stop()
 }
 
 func (backend *ArduinoBackend) Toggle(switchIdx uint, state bool) error {
-    return backend.runner.Dispatch(arduinoCommand{switchIdx, state})
+	return backend.runner.Dispatch(arduinoCommand{switchIdx, state})
 }
 
 func (backend *ArduinoBackend) Id() string {
-    return backend.id
+	return backend.id
 }
 
 func (backend *ArduinoBackend) setId(id string) {
-    backend.id = id
+	backend.id = id
 }
 
 func (backend *ArduinoBackend) Marshal() MarshalledBackend {
-    return MarshalledBackend{
-        Id: backend.id,
-        Host: backend.host,
-        Type: "arduino",
-    }
+	return MarshalledBackend{
+		Id:   backend.id,
+		Host: backend.host,
+		Type: "arduino",
+	}
 }
 
 func CreateArduinoBackend(host string) *ArduinoBackend {
-    backend := ArduinoBackend{
-        host: host,
-    }
+	backend := ArduinoBackend{
+		host: host,
+	}
 
-    backend.runner.Execute = backend.execute
-    backend.httpClient.Timeout = 60 * time.Second
+	backend.runner.Execute = backend.execute
+	backend.httpClient.Timeout = 60 * time.Second
 
-    return &backend
+	return &backend
 }

@@ -1,20 +1,20 @@
 package controls
 
 type MarshalledBackend struct {
-    Id string `json:"id"`
-    Type string `json:"type"`
-    Host string `json:"host"`
+	Id   string `json:"id"`
+	Type string `json:"type"`
+	Host string `json:"host"`
 }
 
 type MarshalledSwitch struct {
-    Id string `json:"id"`
-    Type string `json:"type"`
-    Name string `json:"name"`
-    BackendId string `json:"backendId"`
-    BackendIndex uint `json:"backendIndex"`
+	Id           string `json:"id"`
+	Type         string `json:"type"`
+	Name         string `json:"name"`
+	BackendId    string `json:"backendId"`
+	BackendIndex uint   `json:"backendIndex"`
 }
 
 type MarshalledControlSet struct {
-    Backends []MarshalledBackend `json:"backends"`
-    Switches []MarshalledSwitch `json:"switches"`
+	Backends []MarshalledBackend `json:"backends"`
+	Switches []MarshalledSwitch  `json:"switches"`
 }
