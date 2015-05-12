@@ -5,6 +5,8 @@ type Switch interface {
     Name() string
     Id() string
 
+    SetName(name string)
+
     Start() error
     Stop() error
 

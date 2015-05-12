@@ -67,6 +67,7 @@ func (s* PlainSwitch) Marshal() MarshalledSwitch {
         Type: "plain",
         BackendId: s.backend.Id(),
         BackendIndex: s.backendIdx,
+        Name: s.name,
     }
 }
 

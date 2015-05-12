@@ -9,6 +9,7 @@ type MarshalledBackend struct {
 type MarshalledSwitch struct {
     Id string `json:"id"`
     Type string `json:"type"`
+    Name string `json:"name"`
     BackendId string `json:"backendId"`
     BackendIndex uint `json:"backendIndex"`
 }

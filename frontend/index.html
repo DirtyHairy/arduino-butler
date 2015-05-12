@@ -14,40 +14,29 @@
     </style>
 </head>
 
-<body ng-app="toggles" ng-controller="socketController as controller">
+<body ng-app="toggles" ng-controller="switchController as controller">
     <div class="container">
-        <div ng-repeat="socket in sockets">
-            <h2>{{socket.name}}</h2>
+        <div ng-repeat="switch in switches">
+            <h2>{{switch.name}}</h2>
         <div class="btn-group">
-            <button class="btn btn-primary" ng-click="controller.toggle(socket.index, true)">Ein</button>
-            <button class="btn btn-primary" ng-click="controller.toggle(socket.index, false)">Aus</button>
+            <button class="btn btn-primary" ng-click="controller.toggle(switch.id, true)">Ein</button>
+            <button class="btn btn-primary" ng-click="controller.toggle(switch.id, false)">Aus</button>
         </div>
         </p>
     </div>
     <script>
 
 angular.module('toggles', ['ui.bootstrap'])
-    .value('sockets', [
-        {
-            name: 'Wohnzimmerbuffet',
-            index: 0
-        }, {
-            name: 'Essecke',
-            index: 1
-        }, {
-            name: 'Steckdose #3',
-            index: 2
-        }, {
-            name: 'Steckdose #4',
-            index: 3
-        }
-    ])
-    .controller('socketController', ['$http', '$scope', 'sockets', function($http, $scope, sockets) {
+    .controller('switchController', ['$http', '$scope', function($http, $scope) {
 
-        $scope.sockets = sockets;
+        $http.get('/api/structure').then(function(response) {
+            if (!response.status == 200) return;
 
-        this.toggle = function(index, state) {
-            $http.get('/api/switch/' + index + '/' + (state ? 'on' : 'off'));
+            $scope.switches = response.data.switches;
+        });
+
+        this.toggle = function(id, state) {
+            $http.post('/api/switch/' + id + '/' + (state ? 'on' : 'off'), '');
         };
 
     }]);

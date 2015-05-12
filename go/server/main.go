@@ -79,8 +79,13 @@ func getStructure(response http.ResponseWriter, request *http.Request, matches [
     if err != nil {
         response.WriteHeader(http.StatusInternalServerError)
     } else {
+        header := response.Header()
+        header.Add("content-type", "application/json")
+        header.Add("cache-control", "no-cache, no-store, must-revalidate")
+        header.Add("pragma", "no-cache")
+        header.Add("expires", "0")
+
         response.WriteHeader(http.StatusOK)
-        response.Header().Add("content-type", "application/json")
         response.Write(serializedControlSet)
     }
 }
@@ -95,9 +100,16 @@ func main() {
     controlSet.AddBackend(controls.CreateArduinoBackend(config.controlHost), "arduino1")
 
     controlSet.AddSwitch(controls.CreatePlainSwitch(0), "buffet", "arduino1")
+    controlSet.GetSwitch("buffet").SetName("Wohnzimmerbuffet")
+
     controlSet.AddSwitch(controls.CreatePlainSwitch(1), "essecke", "arduino1")
+    controlSet.GetSwitch("essecke").SetName("Essecke")
+
     controlSet.AddSwitch(controls.CreatePlainSwitch(2), "leselicht", "arduino1")
+    controlSet.GetSwitch("leselicht").SetName("Leselicht Sofa")
+
     controlSet.AddSwitch(controls.CreatePlainSwitch(3), "ecke", "arduino1")
+    controlSet.GetSwitch("ecke").SetName("Ecke bei den Gitarren")
 
 	router := routerPkg.CreateRouter(10)
 	router.AddRoute("^/api/switch/(\\w+)/(on|off)$", routerPkg.HandlerFunction(handleSwitch))
