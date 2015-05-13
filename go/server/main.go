@@ -7,6 +7,7 @@ import (
 	"github.com/DirtyHairy/arduino-butler/go/server/controls"
 	"github.com/DirtyHairy/arduino-butler/go/util/ip"
 	routerPkg "github.com/DirtyHairy/arduino-butler/go/util/router"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,20 +17,22 @@ type configBag struct {
 	port         int
 	ip           string
 	frontendPath string
-	controlHost  string
+	configFile   string
 }
 
-var controlSet *controls.ControlSet
-
 func parseCommandline() configBag {
-	config := configBag{8888, "", "./frontend", "localhost:8080"}
+	config := configBag{
+		port:         8888,
+		frontendPath: "./frontend",
+		configFile:   "config.json",
+	}
 
 	ip := ip.Create()
 
 	flag.Var(&ip, "i", "server listen IP")
 	flag.IntVar(&config.port, "p", config.port, "server listen port")
 	flag.StringVar(&config.frontendPath, "f", config.frontendPath, "path to frontend")
-	flag.StringVar(&config.controlHost, "h", config.controlHost, "control host")
+	flag.StringVar(&config.configFile, "c", config.configFile, "configuration file")
 
 	flag.Parse()
 
@@ -38,56 +41,28 @@ func parseCommandline() configBag {
 	return config
 }
 
-func handleSwitch(response http.ResponseWriter, request *http.Request, matches []string) {
-	fmt.Printf("handling request for %s\n", matches[0])
-
-	switchId := matches[1]
-	state := matches[2] == "on"
-
-	swtch := controlSet.GetSwitch(switchId)
-	var err error
-
-	if swtch != nil {
-		err = swtch.Toggle(state)
-	} else {
-		fmt.Print("no such switch\n")
-		response.WriteHeader(http.StatusNotFound)
-		return
-	}
+func createContrlSetFromConfigFile(configFile string) (*controls.ControlSet, error) {
+	configFileContent, err := ioutil.ReadFile(configFile)
 
 	if err != nil {
-		fmt.Printf("error: %v\n", err)
+		return nil, err
 	}
 
-	switch err.(type) {
-	case nil:
-		response.WriteHeader(http.StatusOK)
+	var controlSetMarshalled controls.MarshalledControlSet
 
-	case controls.ControlNotFoundError:
-		response.WriteHeader(http.StatusNotFound)
-
-	default:
-		response.WriteHeader(http.StatusInternalServerError)
-	}
-}
-
-func getStructure(response http.ResponseWriter, request *http.Request, matches []string) {
-	marshalledControlSet := controlSet.Marshal()
-
-	serializedControlSet, err := json.MarshalIndent(marshalledControlSet, "", "  ")
+	err = json.Unmarshal(configFileContent, &controlSetMarshalled)
 
 	if err != nil {
-		response.WriteHeader(http.StatusInternalServerError)
-	} else {
-		header := response.Header()
-		header.Add("content-type", "application/json")
-		header.Add("cache-control", "no-cache, no-store, must-revalidate")
-		header.Add("pragma", "no-cache")
-		header.Add("expires", "0")
-
-		response.WriteHeader(http.StatusOK)
-		response.Write(serializedControlSet)
+		return nil, err
 	}
+
+	controlSet, err := controlSetMarshalled.Unmarshal()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return controlSet, nil
 }
 
 func main() {
@@ -95,25 +70,20 @@ func main() {
 
 	listenAddress := config.ip + ":" + strconv.Itoa(config.port)
 
-	controlSet = controls.CreateControlSet()
+	fmt.Println("reading config...")
 
-	controlSet.AddBackend(controls.CreateArduinoBackend(config.controlHost), "arduino1")
+	controlSet, err := createContrlSetFromConfigFile(config.configFile)
 
-	controlSet.AddSwitch(controls.CreatePlainSwitch(0), "buffet", "arduino1")
-	controlSet.GetSwitch("buffet").SetName("Wohnzimmerbuffet")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	controlSet.AddSwitch(controls.CreatePlainSwitch(1), "essecke", "arduino1")
-	controlSet.GetSwitch("essecke").SetName("Essecke")
-
-	controlSet.AddSwitch(controls.CreatePlainSwitch(2), "leselicht", "arduino1")
-	controlSet.GetSwitch("leselicht").SetName("Leselicht Sofa")
-
-	controlSet.AddSwitch(controls.CreatePlainSwitch(3), "ecke", "arduino1")
-	controlSet.GetSwitch("ecke").SetName("Ecke bei den Gitarren")
+	controller := CreateController(controlSet)
 
 	router := routerPkg.CreateRouter(10)
-	router.AddRoute("^/api/switch/(\\w+)/(on|off)$", routerPkg.HandlerFunction(handleSwitch))
-	router.AddRoute("^/api/structure$", routerPkg.HandlerFunction(getStructure))
+	router.AddRoute("^/api/switch/(\\w+)/(on|off)$", routerPkg.HandlerFunction(controller.HandleSwitch))
+	router.AddRoute("^/api/structure$", routerPkg.HandlerFunction(controller.GetStructure))
 
 	http.Handle("/", http.FileServer(http.Dir(config.frontendPath)))
 	http.Handle("/api/", router)

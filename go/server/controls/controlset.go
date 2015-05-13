@@ -11,38 +11,45 @@ type toggleCommand struct {
 }
 
 type ControlSet struct {
-	backends map[string]Backend
-	switches map[string]Switch
+	backendMap map[string]Backend
+	switchMap  map[string]Switch
+
+	backends []Backend
+	switches []Switch
 }
 
 func CreateControlSet() *ControlSet {
 	controls := ControlSet{
-		backends: make(map[string]Backend),
-		switches: make(map[string]Switch),
+		backendMap: make(map[string]Backend),
+		switchMap:  make(map[string]Switch),
+		backends:   make([]Backend, 0, 10),
+		switches:   make([]Switch, 0, 10),
 	}
 
 	return &controls
 }
 
 func (set *ControlSet) AddBackend(backend Backend, id string) error {
-	if _, ok := set.backends[id]; ok {
+	if _, ok := set.backendMap[id]; ok {
 		return errors.New(fmt.Sprintf("backend '%s' already defined", id))
 	}
 
 	backend.setId(id)
 
-	set.backends[id] = backend
+	set.backendMap[id] = backend
+	set.backends = append(set.backends, backend)
+
 	return nil
 }
 
 func (set *ControlSet) AddSwitch(swtch Switch, id string, backendId string) error {
-	if _, ok := set.switches[id]; ok {
+	if _, ok := set.switchMap[id]; ok {
 		return errors.New(fmt.Sprintf("switch '%s' already defined", id))
 	}
 
-	b, ok := set.backends[backendId]
+	b, ok := set.backendMap[backendId]
 	if !ok {
-		return errors.New(fmt.Sprintf("backend '%s' is undefined", backendId))
+		return errors.New(fmt.Sprintf("switch '%s': backend '%s' is undefined", swtch.Id(), backendId))
 	}
 
 	if err := swtch.setBackend(b); err != nil {
@@ -51,30 +58,32 @@ func (set *ControlSet) AddSwitch(swtch Switch, id string, backendId string) erro
 
 	swtch.setId(id)
 
-	set.switches[id] = swtch
+	set.switchMap[id] = swtch
+	set.switches = append(set.switches, swtch)
+
 	return nil
 }
 
 func (set *ControlSet) Start() error {
-	var firstError error
-
 	for _, b := range set.backends {
 		err := b.Start()
 
-		if firstError == nil {
-			firstError = err
+		if err != nil {
+			_ = set.Stop()
+			return err
 		}
 	}
 
 	for _, s := range set.switches {
 		err := s.Start()
 
-		if firstError == nil {
-			firstError = err
+		if err != nil {
+			_ = set.Stop()
+			return err
 		}
 	}
 
-	return firstError
+	return nil
 }
 
 func (set *ControlSet) Stop() error {
@@ -101,7 +110,7 @@ func (set *ControlSet) Stop() error {
 }
 
 func (set *ControlSet) GetSwitch(id string) Switch {
-	swtch, ok := set.switches[id]
+	swtch, ok := set.switchMap[id]
 
 	if ok {
 		return swtch

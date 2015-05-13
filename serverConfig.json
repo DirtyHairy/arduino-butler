@@ -1,0 +1,39 @@
+{
+  "backends": [
+    {
+      "id": "arduino1",
+      "type": "arduino",
+      "host": "butler"
+    }
+  ],
+  "switches": [
+    {
+      "id": "buffet",
+      "type": "plain",
+      "name": "Wohnzimmerbuffet",
+      "backendId": "arduino1",
+      "backendIndex": 0
+    },
+    {
+      "id": "essecke",
+      "type": "plain",
+      "name": "Essecke",
+      "backendId": "arduino1",
+      "backendIndex": 1
+    },
+    {
+      "id": "ecke",
+      "type": "plain",
+      "name": "Ecke bei den Gitarren",
+      "backendId": "arduino1",
+      "backendIndex": 3
+    },
+    {
+      "id": "leselicht",
+      "type": "plain",
+      "name": "Leselicht Sofa",
+      "backendId": "arduino1",
+      "backendIndex": 2
+    }
+  ]
+}
