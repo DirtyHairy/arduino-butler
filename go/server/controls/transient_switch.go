@@ -19,7 +19,7 @@ type TransientSwitch struct {
 	exciteTimestamp time.Time
 	retry           time.Duration
 
-	timer               *time.Timer
+	timer *time.Timer
 
 	publicVolatileState transientSwitchPublicVolatileState
 }
@@ -122,9 +122,9 @@ func (s *TransientSwitch) scheduleSignal(delay time.Duration) {
 	s.stopSignal()
 
 	s.timer = time.AfterFunc(delay, func() {
-        fmt.Printf("switch '%s': signaling...\n", s.id)
-        s.runner.Dispatch(switchCommandSignal(0))
-    });
+		fmt.Printf("switch '%s': signaling...\n", s.id)
+		s.runner.Dispatch(switchCommandSignal(0))
+	})
 }
 
 func (s *TransientSwitch) stopSignal() {

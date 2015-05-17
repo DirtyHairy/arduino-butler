@@ -59,7 +59,7 @@ func (m MarshalledSwitch) Unmarshal() (Switch, error) {
 
 		timeout, err := time.ParseDuration(*m.Timeout)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("switch '%s%': invalid duration: %v", m.Id, err))
+			return nil, errors.New(fmt.Sprintf("switch '%s': invalid duration: %v", m.Id, err))
 		}
 
 		swtch = CreateTransientSwitch(m.BackendIndex, groundState, timeout)
