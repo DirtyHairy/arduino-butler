@@ -30,10 +30,11 @@
     },
     {
       "id": "leselicht",
-      "type": "plain",
+      "type": "transient",
       "name": "Leselicht Sofa",
       "backendId": "arduino1",
-      "backendIndex": 2
+      "backendIndex": 2,
+      "timeout": "10s"
     }
   ]
 }

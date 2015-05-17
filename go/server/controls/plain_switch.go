@@ -5,7 +5,7 @@ import (
 	"github.com/DirtyHairy/arduino-butler/go/util/runner"
 )
 
-type plainSwitchCommand bool
+type switchCommandToggle bool
 
 type PlainSwitch struct {
 	name string
@@ -18,7 +18,11 @@ type PlainSwitch struct {
 }
 
 func (s *PlainSwitch) Toggle(state bool) error {
-	return s.runner.Dispatch(plainSwitchCommand(state))
+	return s.runner.Dispatch(switchCommandToggle(state))
+}
+
+func (s *PlainSwitch) executeToggle(state bool) error {
+	return s.backend.Toggle(s.backendIdx, state)
 }
 
 func (s *PlainSwitch) Name() string {
@@ -44,13 +48,13 @@ func (s *PlainSwitch) setBackend(b Backend) error {
 }
 
 func (s *PlainSwitch) execute(c interface{}) error {
-	cmd, ok := c.(plainSwitchCommand)
+	cmd, ok := c.(switchCommandToggle)
 
 	if !ok {
 		return errors.New("invalid command")
 	}
 
-	return s.backend.Toggle(s.backendIdx, bool(cmd))
+	return s.executeToggle(bool(cmd))
 }
 
 func (s *PlainSwitch) Start() error {
@@ -64,7 +68,7 @@ func (s *PlainSwitch) Stop() error {
 func (s *PlainSwitch) Marshal() MarshalledSwitch {
 	return MarshalledSwitch{
 		Id:           s.id,
-		Type:         "plain",
+		Type:         SwitchTypePlain,
 		BackendId:    s.backend.Id(),
 		BackendIndex: s.backendIdx,
 		Name:         s.name,

@@ -1,5 +1,16 @@
 package controls
 
+import (
+	"errors"
+	"fmt"
+	"time"
+)
+
+const (
+	SwitchTypePlain     = "plain"
+	SwitchTypeTransient = "transient"
+)
+
 type MarshalledBackend struct {
 	Id   string `json:"id"`
 	Type string `json:"type"`
@@ -12,6 +23,12 @@ type MarshalledSwitch struct {
 	Name         string `json:"name"`
 	BackendId    string `json:"backendId"`
 	BackendIndex uint   `json:"backendIndex"`
+
+	GroundState *bool   `json:"groundState,omitempty"`
+	Timeout     *string `json:"timeout,omitempty"`
+
+	State                 *bool   `json:"state,omitempty"`
+	MillisecondsRemaining *uint64 `json:"millisecondsRemaining,omitempty"`
 }
 
 type MarshalledControlSet struct {
@@ -20,7 +37,36 @@ type MarshalledControlSet struct {
 }
 
 func (m MarshalledSwitch) Unmarshal() (Switch, error) {
-	swtch := CreatePlainSwitch(m.BackendIndex)
+	if m.Id == "" {
+		return nil, errors.New("switch needs an id")
+	}
+
+	var swtch Switch
+
+	switch m.Type {
+	case SwitchTypePlain:
+		swtch = CreatePlainSwitch(m.BackendIndex)
+
+	case SwitchTypeTransient:
+		groundState := false
+		if m.GroundState != nil {
+			groundState = *m.GroundState
+		}
+
+		if m.Timeout == nil {
+			return nil, errors.New(fmt.Sprintf("no timeout specified for switch '%s'", m.Id))
+		}
+
+		timeout, err := time.ParseDuration(*m.Timeout)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("switch '%s%': invalid duration: %v", m.Id, err))
+		}
+
+		swtch = CreateTransientSwitch(m.BackendIndex, groundState, timeout)
+
+	default:
+		return nil, errors.New(fmt.Sprintf("switch '%s': invalid type '%s'", m.Id, m.Type))
+	}
 
 	swtch.setId(m.Id)
 	swtch.SetName(m.Name)
