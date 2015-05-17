@@ -3,7 +3,7 @@
     {
       "id": "arduino1",
       "type": "arduino",
-      "host": "butler"
+      "host": "localhost:8000"
     }
   ],
   "switches": [

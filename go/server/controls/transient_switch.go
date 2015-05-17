@@ -20,7 +20,6 @@ type TransientSwitch struct {
 	retry           time.Duration
 
 	timer               *time.Timer
-	timerControlChannel chan int
 
 	publicVolatileState transientSwitchPublicVolatileState
 }
@@ -122,28 +121,13 @@ func (s *TransientSwitch) executeSignal() error {
 func (s *TransientSwitch) scheduleSignal(delay time.Duration) {
 	s.stopSignal()
 
-	timer := time.NewTimer(delay)
-	s.timerControlChannel = make(chan int)
-
-	go func() {
-		select {
-		case _ = <-timer.C:
-			fmt.Printf("switch '%s': signaling...\n", s.id)
-			s.runner.Dispatch(switchCommandSignal(0))
-
-		case _ = <-s.timerControlChannel:
-		}
-	}()
-
-	s.timer = timer
+	s.timer = time.AfterFunc(delay, func() {
+        fmt.Printf("switch '%s': signaling...\n", s.id)
+        s.runner.Dispatch(switchCommandSignal(0))
+    });
 }
 
 func (s *TransientSwitch) stopSignal() {
-	if s.timerControlChannel != nil {
-		close(s.timerControlChannel)
-		s.timerControlChannel = nil
-	}
-
 	if s.timer != nil {
 		s.timer.Stop()
 		s.timer = nil
