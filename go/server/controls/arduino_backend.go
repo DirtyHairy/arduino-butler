@@ -86,7 +86,7 @@ func (backend *ArduinoBackend) Marshal() MarshalledBackend {
 	return MarshalledBackend{
 		Id:   backend.id,
 		Host: backend.host,
-		Type: "arduino",
+		Type: BackendTypeArduino,
 	}
 }
 

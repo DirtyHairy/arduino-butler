@@ -140,11 +140,7 @@ func (s *TransientSwitch) Marshal() MarshalledSwitch {
 	defer publicState.mutex.RUnlock()
 
 	m := s.PlainSwitch.Marshal()
-
-	m.GroundState = new(bool)
-	m.Timeout = new(string)
-	m.State = new(bool)
-	m.MillisecondsRemaining = new(uint64)
+	m.allocateTransientSwitch()
 
 	m.Type = SwitchTypeTransient
 	*m.GroundState = s.groundState

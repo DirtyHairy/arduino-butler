@@ -6,6 +6,7 @@ GO_BUILDDIR = ./build
 GO_SRCDIR = go
 GO_PACKAGE_PREFIX = github.com/DirtyHairy/arduino-butler
 GO_PACKAGES = server server/controls util/ip util mockduino util/router util/mock util/runner
+GO_DEPENDENCIES = github.com/davecgh/go-spew/spew
 
 GIT = git
 GIT_COMMITFLAGS = -a
@@ -38,6 +39,7 @@ commit: fmt
 $(GO_BUILDDIR):
 	mkdir -p ./$(GO_BUILDDIR)/src/$(GO_PACKAGE_PREFIX)
 	ln -s `pwd`/$(GO_SRCDIR) ./$(GO_BUILDDIR)/src/$(GO_PACKAGE_PREFIX)/$(GO_SRCDIR)
+	GOPATH=`pwd`/$(GO_BUILDDIR) $(GO) get $(GO_DEPENDENCIES)
 
 clean:
 	-rm -fr $(GARBAGE)
