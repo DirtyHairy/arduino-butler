@@ -6,7 +6,7 @@ GO_BUILDDIR = ./build
 GO_SRCDIR = go
 GO_PACKAGE_PREFIX = github.com/DirtyHairy/arduino-butler
 GO_PACKAGES = server server/controls util/ip util mockduino util/router util/mock util/runner
-GO_DEPENDENCIES = github.com/davecgh/go-spew/spew
+GO_DEPENDENCIES = github.com/davecgh/go-spew/spew github.com/googollee/go-socket.io
 
 GIT = git
 GIT_COMMITFLAGS = -a

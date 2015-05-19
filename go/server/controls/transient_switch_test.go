@@ -205,6 +205,49 @@ func TestUnmarshal(t *testing.T) {
 	}
 }
 
+func TestSwitchUpdatedEvent(t *testing.T) {
+    swtch, _ := initialize()
+
+    eventChannel := make(chan interface{}, 10)
+    swtch.setEventChannel(eventChannel)
+
+    swtch.Start()
+    defer swtch.Stop()
+
+    emptyChannelLoop: for {
+        select {
+            case _ = <-eventChannel:
+
+            default:
+                break emptyChannelLoop
+        }
+    }
+
+    swtch.Toggle(true)
+
+    select {
+        case evt := <-eventChannel:
+            e, ok := evt.(SwitchUpdatedEvent)
+
+            if !ok {
+                t.Error("invalid event --- should be a SwitchUpdatedEvent")
+            }
+
+            s, ok := Switch(e).(*TransientSwitch)
+
+            if !ok {
+                t.Error("invalid event --- should encapsulate a TransientSwitch")
+            }
+
+            if s != swtch {
+                t.Error("wrong switch sent")
+            }
+
+        default:
+            t.Error("event channels should deliver update event")
+    }
+}
+
 func TestMain(m *testing.M) {
 	runtime.GOMAXPROCS(4)
 

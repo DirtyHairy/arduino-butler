@@ -16,6 +16,8 @@ type ControlSet struct {
 
 	backends []Backend
 	switches []Switch
+
+    eventChannel chan interface{}
 }
 
 func CreateControlSet() *ControlSet {
@@ -24,6 +26,7 @@ func CreateControlSet() *ControlSet {
 		switchMap:  make(map[string]Switch),
 		backends:   make([]Backend, 0, 10),
 		switches:   make([]Switch, 0, 10),
+        eventChannel: make(chan interface{}, 10),
 	}
 
 	return &controls
@@ -56,6 +59,7 @@ func (set *ControlSet) AddSwitch(swtch Switch, id string, backendId string) erro
 		return err
 	}
 
+    swtch.setEventChannel(set.eventChannel)
 	swtch.setId(id)
 
 	set.switchMap[id] = swtch
@@ -117,6 +121,10 @@ func (set *ControlSet) GetSwitch(id string) Switch {
 	} else {
 		return nil
 	}
+}
+
+func (set *ControlSet) GetEventChannel() chan interface{} {
+    return set.eventChannel
 }
 
 func (set *ControlSet) Marshal() MarshalledControlSet {

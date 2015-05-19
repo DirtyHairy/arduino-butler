@@ -12,6 +12,7 @@ type Switch interface {
 
 	setBackend(Backend) error
 	setId(string)
+    setEventChannel(chan interface{})
 
 	Marshal() MarshalledSwitch
 }

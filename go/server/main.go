@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+    "github.com/googollee/go-socket.io"
 )
 
 type configBag struct {
@@ -65,6 +66,32 @@ func createContrlSetFromConfigFile(configFile string) (*controls.ControlSet, err
 	return controlSet, nil
 }
 
+func createSocketIoServer(eventChannel chan interface{}) (*socketio.Server, error) {
+    server, err := socketio.NewServer(nil)
+
+    if err != nil {
+        return nil, err
+    }
+
+    go func() {
+        evt, ok := <-eventChannel
+
+        if !ok {
+            panic("event channel closed!")
+        }
+
+        switch evt := evt.(type) {
+            case controls.SwitchUpdatedEvent:
+                server.BroadcastTo("updates", "switchUpdate", controls.Switch(evt).Marshal())
+
+            default:
+                fmt.Println("invalid event type")
+        }
+    }()
+
+    return server, nil
+}
+
 func main() {
 	config := parseCommandline()
 
@@ -85,8 +112,15 @@ func main() {
 	router.AddRoute("^/api/switch/(\\w+)/(on|off)$", routerPkg.HandlerFunction(controller.HandleSwitch))
 	router.AddRoute("^/api/structure$", routerPkg.HandlerFunction(controller.GetStructure))
 
+    socketIoServer, err := createSocketIoServer(controlSet.GetEventChannel())
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+
 	http.Handle("/", http.FileServer(http.Dir(config.frontendPath)))
 	http.Handle("/api/", router)
+    http.Handle("/socket.io", socketIoServer)
 
 	fmt.Printf("Frontend served from %s\n", config.frontendPath)
 	fmt.Printf("Server listening on %s\n", listenAddress)
