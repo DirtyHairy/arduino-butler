@@ -17,16 +17,16 @@ type ControlSet struct {
 	backends []Backend
 	switches []Switch
 
-    eventChannel chan interface{}
+	eventChannel chan interface{}
 }
 
 func CreateControlSet() *ControlSet {
 	controls := ControlSet{
-		backendMap: make(map[string]Backend),
-		switchMap:  make(map[string]Switch),
-		backends:   make([]Backend, 0, 10),
-		switches:   make([]Switch, 0, 10),
-        eventChannel: make(chan interface{}, 10),
+		backendMap:   make(map[string]Backend),
+		switchMap:    make(map[string]Switch),
+		backends:     make([]Backend, 0, 10),
+		switches:     make([]Switch, 0, 10),
+		eventChannel: make(chan interface{}, 10),
 	}
 
 	return &controls
@@ -59,7 +59,7 @@ func (set *ControlSet) AddSwitch(swtch Switch, id string, backendId string) erro
 		return err
 	}
 
-    swtch.setEventChannel(set.eventChannel)
+	swtch.setEventChannel(set.eventChannel)
 	swtch.setId(id)
 
 	set.switchMap[id] = swtch
@@ -124,7 +124,7 @@ func (set *ControlSet) GetSwitch(id string) Switch {
 }
 
 func (set *ControlSet) GetEventChannel() chan interface{} {
-    return set.eventChannel
+	return set.eventChannel
 }
 
 func (set *ControlSet) Marshal() MarshalledControlSet {

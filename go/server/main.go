@@ -7,11 +7,11 @@ import (
 	"github.com/DirtyHairy/arduino-butler/go/server/controls"
 	"github.com/DirtyHairy/arduino-butler/go/util/ip"
 	routerPkg "github.com/DirtyHairy/arduino-butler/go/util/router"
+	"github.com/googollee/go-socket.io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
-    "github.com/googollee/go-socket.io"
 )
 
 type configBag struct {
@@ -67,34 +67,34 @@ func createContrlSetFromConfigFile(configFile string) (*controls.ControlSet, err
 }
 
 func createSocketIoServer(eventChannel chan interface{}) (*socketio.Server, error) {
-    server, err := socketio.NewServer(nil)
+	server, err := socketio.NewServer(nil)
 
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
-    go func() {
-        for {
-            evt, ok := <-eventChannel
+	go func() {
+		for {
+			evt, ok := <-eventChannel
 
-            if !ok {
-                panic("event channel closed!")
-            }
+			if !ok {
+				panic("event channel closed!")
+			}
 
-            switch evt := evt.(type) {
-                case controls.SwitchUpdatedEvent:
-                    swtch := controls.Switch(evt)
+			switch evt := evt.(type) {
+			case controls.SwitchUpdatedEvent:
+				swtch := controls.Switch(evt)
 
-                    fmt.Printf("sending update broadcast for switch '%s'\n", swtch.Id())
-                    server.BroadcastTo("updates", "switchUpdate", swtch.Marshal())
+				fmt.Printf("sending update broadcast for switch '%s'\n", swtch.Id())
+				server.BroadcastTo("updates", "switchUpdate", swtch.Marshal())
 
-                default:
-                    fmt.Println("invalid event type")
-            }
-        }
-    }()
+			default:
+				fmt.Println("invalid event type")
+			}
+		}
+	}()
 
-    return server, nil
+	return server, nil
 }
 
 func main() {
@@ -117,15 +117,15 @@ func main() {
 	router.AddRoute("^/api/switch/(\\w+)/(on|off)$", routerPkg.HandlerFunction(controller.HandleSwitch))
 	router.AddRoute("^/api/structure$", routerPkg.HandlerFunction(controller.GetStructure))
 
-    socketIoServer, err := createSocketIoServer(controlSet.GetEventChannel())
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	socketIoServer, err := createSocketIoServer(controlSet.GetEventChannel())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	http.Handle("/", http.FileServer(http.Dir(config.frontendPath)))
 	http.Handle("/api/", router)
-    http.Handle("/socket.io", socketIoServer)
+	http.Handle("/socket.io", socketIoServer)
 
 	fmt.Printf("Frontend served from %s\n", config.frontendPath)
 	fmt.Printf("Server listening on %s\n", listenAddress)

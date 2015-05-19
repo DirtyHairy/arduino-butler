@@ -206,46 +206,47 @@ func TestUnmarshal(t *testing.T) {
 }
 
 func TestSwitchUpdatedEvent(t *testing.T) {
-    swtch, _ := initialize()
+	swtch, _ := initialize()
 
-    eventChannel := make(chan interface{}, 10)
-    swtch.setEventChannel(eventChannel)
+	eventChannel := make(chan interface{}, 10)
+	swtch.setEventChannel(eventChannel)
 
-    swtch.Start()
-    defer swtch.Stop()
+	swtch.Start()
+	defer swtch.Stop()
 
-    emptyChannelLoop: for {
-        select {
-            case _ = <-eventChannel:
+emptyChannelLoop:
+	for {
+		select {
+		case _ = <-eventChannel:
 
-            default:
-                break emptyChannelLoop
-        }
-    }
+		default:
+			break emptyChannelLoop
+		}
+	}
 
-    swtch.Toggle(true)
+	swtch.Toggle(true)
 
-    select {
-        case evt := <-eventChannel:
-            e, ok := evt.(SwitchUpdatedEvent)
+	select {
+	case evt := <-eventChannel:
+		e, ok := evt.(SwitchUpdatedEvent)
 
-            if !ok {
-                t.Error("invalid event --- should be a SwitchUpdatedEvent")
-            }
+		if !ok {
+			t.Error("invalid event --- should be a SwitchUpdatedEvent")
+		}
 
-            s, ok := Switch(e).(*TransientSwitch)
+		s, ok := Switch(e).(*TransientSwitch)
 
-            if !ok {
-                t.Error("invalid event --- should encapsulate a TransientSwitch")
-            }
+		if !ok {
+			t.Error("invalid event --- should encapsulate a TransientSwitch")
+		}
 
-            if s != swtch {
-                t.Error("wrong switch sent")
-            }
+		if s != swtch {
+			t.Error("wrong switch sent")
+		}
 
-        default:
-            t.Error("event channels should deliver update event")
-    }
+	default:
+		t.Error("event channels should deliver update event")
+	}
 }
 
 func TestMain(m *testing.M) {

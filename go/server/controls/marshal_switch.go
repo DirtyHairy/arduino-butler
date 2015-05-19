@@ -34,7 +34,7 @@ func (m *MarshalledSwitch) allocateTransientSwitch() {
 
 func (m *MarshalledSwitch) Unmarshal() (Switch, error) {
 	var swtch Switch
-    var err error
+	var err error
 
 	if err = m.validate(); err != nil {
 		return nil, err
@@ -81,9 +81,9 @@ func (m *MarshalledSwitch) validateTransient() error {
 }
 
 func (m *MarshalledSwitch) unmarshalTransient() (*TransientSwitch, error) {
-    if err := m.validateTransient(); err != nil {
-        return nil, err
-    }
+	if err := m.validateTransient(); err != nil {
+		return nil, err
+	}
 
 	groundState := false
 	if m.GroundState != nil {

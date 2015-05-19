@@ -47,7 +47,7 @@ func (s *PlainSwitch) setBackend(b Backend) error {
 	return nil
 }
 
-func (s* PlainSwitch) setEventChannel(chan interface{}) {}
+func (s *PlainSwitch) setEventChannel(chan interface{}) {}
 
 func (s *PlainSwitch) execute(c interface{}) error {
 	cmd, ok := c.(switchCommandToggle)

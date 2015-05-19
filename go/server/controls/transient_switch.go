@@ -16,7 +16,7 @@ type TransientSwitch struct {
 	groundState bool
 	timeout     time.Duration
 
-    eventChannel chan interface{}
+	eventChannel chan interface{}
 
 	exciteTimestamp time.Time
 	retry           time.Duration
@@ -90,9 +90,9 @@ func (s *TransientSwitch) executeToggle(state bool) error {
 
 	s.updatePublicState()
 
-    if s.eventChannel != nil {
-        s.eventChannel <- SwitchUpdatedEvent(s)
-    }
+	if s.eventChannel != nil {
+		s.eventChannel <- SwitchUpdatedEvent(s)
+	}
 
 	return nil
 }
@@ -178,5 +178,5 @@ func (s *TransientSwitch) Start() error {
 }
 
 func (s *TransientSwitch) setEventChannel(eventChannel chan interface{}) {
-    s.eventChannel = eventChannel
+	s.eventChannel = eventChannel
 }
