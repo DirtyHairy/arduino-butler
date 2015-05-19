@@ -34,8 +34,9 @@ func (m *MarshalledSwitch) allocateTransientSwitch() {
 
 func (m *MarshalledSwitch) Unmarshal() (Switch, error) {
 	var swtch Switch
+    var err error
 
-	if err := m.validate(); err != nil {
+	if err = m.validate(); err != nil {
 		return nil, err
 	}
 
@@ -44,11 +45,9 @@ func (m *MarshalledSwitch) Unmarshal() (Switch, error) {
 		swtch = CreatePlainSwitch(m.BackendIndex)
 
 	case SwitchTypeTransient:
-		if err := m.validateTransient(); err != nil {
+		if swtch, err = m.unmarshalTransient(); err != nil {
 			return nil, err
 		}
-
-		swtch = m.unmarshalTransient()
 
 	default:
 		return nil, errors.New(fmt.Sprintf("switch '%s': invalid type '%s'", m.Id, m.Type))
@@ -81,7 +80,11 @@ func (m *MarshalledSwitch) validateTransient() error {
 	return nil
 }
 
-func (m *MarshalledSwitch) unmarshalTransient() *TransientSwitch {
+func (m *MarshalledSwitch) unmarshalTransient() (*TransientSwitch, error) {
+    if err := m.validateTransient(); err != nil {
+        return nil, err
+    }
+
 	groundState := false
 	if m.GroundState != nil {
 		groundState = *m.GroundState
@@ -89,5 +92,5 @@ func (m *MarshalledSwitch) unmarshalTransient() *TransientSwitch {
 
 	timeout, _ := time.ParseDuration(*m.Timeout)
 
-	return CreateTransientSwitch(m.BackendIndex, groundState, timeout)
+	return CreateTransientSwitch(m.BackendIndex, groundState, timeout), nil
 }
