@@ -74,18 +74,23 @@ func createSocketIoServer(eventChannel chan interface{}) (*socketio.Server, erro
     }
 
     go func() {
-        evt, ok := <-eventChannel
+        for {
+            evt, ok := <-eventChannel
 
-        if !ok {
-            panic("event channel closed!")
-        }
+            if !ok {
+                panic("event channel closed!")
+            }
 
-        switch evt := evt.(type) {
-            case controls.SwitchUpdatedEvent:
-                server.BroadcastTo("updates", "switchUpdate", controls.Switch(evt).Marshal())
+            switch evt := evt.(type) {
+                case controls.SwitchUpdatedEvent:
+                    swtch := controls.Switch(evt)
 
-            default:
-                fmt.Println("invalid event type")
+                    fmt.Printf("sending update broadcast for switch '%s'\n", swtch.Id())
+                    server.BroadcastTo("updates", "switchUpdate", swtch.Marshal())
+
+                default:
+                    fmt.Println("invalid event type")
+            }
         }
     }()
 
