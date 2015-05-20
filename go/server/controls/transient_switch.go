@@ -91,7 +91,7 @@ func (s *TransientSwitch) executeToggle(state bool) error {
 	s.updatePublicState()
 
 	if s.eventChannel != nil {
-		s.eventChannel <- SwitchUpdatedEvent(s)
+		s.eventChannel <- CreateSwitchUpdatedEvent(s)
 	}
 
 	return nil

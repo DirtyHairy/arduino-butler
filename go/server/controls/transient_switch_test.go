@@ -205,48 +205,68 @@ func TestUnmarshal(t *testing.T) {
 	}
 }
 
+func drainChannel(c chan interface{}) (lastValue interface{}, count int) {
+    loop: for {
+        select {
+            case lastValue = <-c:
+
+            default:
+                break loop
+        }
+
+        count++
+    }
+
+    return
+}
+
 func TestSwitchUpdatedEvent(t *testing.T) {
 	swtch, _ := initialize()
 
 	eventChannel := make(chan interface{}, 10)
 	swtch.setEventChannel(eventChannel)
 
-	swtch.Start()
-	defer swtch.Stop()
-
-emptyChannelLoop:
-	for {
-		select {
-		case _ = <-eventChannel:
-
-		default:
-			break emptyChannelLoop
-		}
-	}
-
-	swtch.Toggle(true)
-
-	select {
-	case evt := <-eventChannel:
-		e, ok := evt.(SwitchUpdatedEvent)
+    assert := func(evt interface{}) {
+        e, ok := evt.(SwitchUpdatedEvent)
 
 		if !ok {
-			t.Error("invalid event --- should be a SwitchUpdatedEvent")
+			t.Fatal("invalid event --- should be a SwitchUpdatedEvent")
 		}
 
-		s, ok := Switch(e).(*TransientSwitch)
+		s, ok := e.Switch().(*TransientSwitch)
 
 		if !ok {
-			t.Error("invalid event --- should encapsulate a TransientSwitch")
+			t.Fatal("invalid event --- should encapsulate a TransientSwitch")
 		}
 
 		if s != swtch {
-			t.Error("wrong switch sent")
+			t.Fatal("wrong switch sent")
 		}
+    }
 
-	default:
-		t.Error("event channels should deliver update event")
-	}
+	swtch.Start()
+	defer swtch.Stop()
+
+    time.Sleep(10 * time.Millisecond)
+
+    evt, count := drainChannel(eventChannel)
+
+    if count != 1 {
+        t.Fatalf("expected 1 event after start, got %d events", count)
+    }
+
+    assert(evt)
+
+	swtch.Toggle(true)
+    time.Sleep(10 * time.Millisecond)
+
+    evt, count = drainChannel(eventChannel)
+
+    if count != 1 {
+        t.Fatalf("expected 1 event after toggle, got %d events", count)
+    }
+
+    assert(evt)
 }
 
 func TestMain(m *testing.M) {

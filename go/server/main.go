@@ -83,7 +83,7 @@ func createSocketIoServer(eventChannel chan interface{}) (*socketio.Server, erro
 
 			switch evt := evt.(type) {
 			case controls.SwitchUpdatedEvent:
-				swtch := controls.Switch(evt)
+				swtch := evt.Switch()
 
 				fmt.Printf("sending update broadcast for switch '%s'\n", swtch.Id())
 				server.BroadcastTo("updates", "switchUpdate", swtch.Marshal())
@@ -125,7 +125,7 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir(config.frontendPath)))
 	http.Handle("/api/", router)
-	http.Handle("/socket.io", socketIoServer)
+	http.Handle("/api/socket.io", socketIoServer)
 
 	fmt.Printf("Frontend served from %s\n", config.frontendPath)
 	fmt.Printf("Server listening on %s\n", listenAddress)
