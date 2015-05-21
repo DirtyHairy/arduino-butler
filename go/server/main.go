@@ -73,6 +73,10 @@ func createSocketIoServer(eventChannel chan interface{}) (*socketio.Server, erro
 		return nil, err
 	}
 
+    server.On("connection", func(socket socketio.Socket) {
+        socket.Join("updates")
+    })
+
 	go func() {
 		for {
 			evt, ok := <-eventChannel
@@ -125,7 +129,7 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir(config.frontendPath)))
 	http.Handle("/api/", router)
-	http.Handle("/api/socket.io", socketIoServer)
+	http.Handle("/api/socket.io/", socketIoServer)
 
 	fmt.Printf("Frontend served from %s\n", config.frontendPath)
 	fmt.Printf("Server listening on %s\n", listenAddress)
