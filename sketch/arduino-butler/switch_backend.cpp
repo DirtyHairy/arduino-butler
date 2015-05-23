@@ -49,7 +49,7 @@ CustomSwitch1& CustomSwitch1::Index(uint8_t index) {
 
 bool CustomSwitch1::Toggle(bool state) {
   logging::logTS();
-  logging::log(F("Toggle switch "));
+  logging::log(F("Toggle custom switch "));
   logging::log(index);
   logging::logln(state ? F(" on") : F(" off"));
 
@@ -80,17 +80,58 @@ bool CustomSwitch1::Toggle(bool state) {
   logging::trace(F("Sending code "));
   logging::traceln(code);
 
-  for (uint8_t i = 0; i < SEND_REPEAT; i++) {
-    if (i) delay(SEND_REPEAT_DELAY);
-
-    logging::traceTS();
-    logging::traceln(F("sending..."));
-
-    rc_switch->sendTriState(code);
-
-    logging::traceTS();
-    logging::traceln(F("code sent!"));
-  }
+  rc_switch->setPulseLength(350);
+  rc_switch->sendTriState(code);
 
   return true;
+}
+
+
+RCSwitch* ObiSwitch::rc_switch = NULL;
+
+
+void ObiSwitch::SetRCSwitch(RCSwitch* rc_switch) {
+  ObiSwitch::rc_switch = rc_switch;
+}
+
+
+ObiSwitch::ObiSwitch() : index(0), unit_code(0) {}
+
+
+bool ObiSwitch::Toggle(bool state) {
+  logging::traceTS();
+  logging::trace("Toggling OBI switch ");
+  logging::trace(index);
+  logging::traceln(state ? " on" : " off");
+
+  char code[13] = "0000000F0000";
+
+  memcpy_P(code, unit_code, 7);
+
+  code[9 - index] = '1';
+  
+  code[state ? 11 : 10] = '1';
+
+  logging::traceTS();
+  logging::trace("Sending code ");
+  logging::traceln(code);
+
+  rc_switch->setPulseLength(177);
+  rc_switch->sendTriState(code);
+
+  return true;
+}
+
+
+ObiSwitch& ObiSwitch::Index(uint8_t index) {
+  if (index >= 0 && index < 3) this->index = index;
+
+  return *this;
+}
+
+
+ObiSwitch& ObiSwitch::UnitCode(const PROGMEM char* unit_code) {
+  this->unit_code = unit_code;
+
+  return *this;
 }

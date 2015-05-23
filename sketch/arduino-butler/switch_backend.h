@@ -33,13 +33,6 @@
 
 #include "settings.h"
 
-#ifndef SEND_REPEAT
-  #define SEND_REPEAT 1
-#endif
-#ifndef SEND_REPEAT_DELAY
-  #define SEND_REPEAT_DELAY 10
-#endif
-
 class CustomSwitch1 {
   public:
 
@@ -61,5 +54,33 @@ class CustomSwitch1 {
 
     uint8_t index;
 };
+
+
+class ObiSwitch {
+  public:
+
+    static void SetRCSwitch(RCSwitch* rc_switch);
+
+    ObiSwitch();
+
+    bool Toggle(bool state);
+
+    ObiSwitch& Index(uint8_t index);
+
+    ObiSwitch& UnitCode(const PROGMEM char* unit_code);
+
+  private:
+
+    ObiSwitch(ObiSwitch&);
+
+    ObiSwitch& operator=(const ObiSwitch&);
+
+    static RCSwitch* rc_switch;
+
+    uint8_t index;
+
+    const PROGMEM char* unit_code;
+};
+
 
 #endif // SWITCH_BACKEND_H

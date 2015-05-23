@@ -26,16 +26,12 @@ func (backend *ArduinoBackend) execute(c interface{}) error {
 	cmd, ok := c.(arduinoCommand)
 
 	if !ok {
-		return ExecError("invalid arduinoCommand")
+		return ExecError("invalid arduino command")
 	}
 
 	toggleCmd := "on"
 	if !cmd.state {
 		toggleCmd = "off"
-	}
-
-	if cmd.switchIdx >= 4 {
-		return ControlNotFoundError("invalid switch id")
 	}
 
 	url := fmt.Sprintf("http://%s/socket/%d/%s", backend.host, cmd.switchIdx, toggleCmd)

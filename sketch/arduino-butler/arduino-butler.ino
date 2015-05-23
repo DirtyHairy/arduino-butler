@@ -44,10 +44,13 @@
 #include "switch_controller.h"
 
 EthernetServer server(SERVER_PORT);
-SwitchCollection<4> switch_collection;
+SwitchCollection<7> switch_collection;
 
 void initialize_switches(RCSwitch* rc_switch) {
+  const PROGMEM char* unit_code_obi1 = PSTR("00FFFFF");
+
   CustomSwitch1::SetRCSwitch(rc_switch);
+  ObiSwitch::SetRCSwitch(rc_switch);
 
   static PlainSwitchController<CustomSwitch1> switch0;
   switch0.Backend().Index(0);
@@ -57,13 +60,27 @@ void initialize_switches(RCSwitch* rc_switch) {
   switch1.Backend().Index(1);
   switch_collection.SetSwitch(&switch1, 1);
 
-  static StickySwitchController<CustomSwitch1> switch2;
+  static PlainSwitchController<CustomSwitch1> switch2;
   switch2.Backend().Index(2);
   switch_collection.SetSwitch(&switch2, 2);
 
-  static StickySwitchController<CustomSwitch1> switch3;
+  static PlainSwitchController<CustomSwitch1> switch3;
   switch3.Backend().Index(3);
   switch_collection.SetSwitch(&switch3, 3);
+
+  static StickySwitchController<ObiSwitch> switch4;
+  switch4.Backend().UnitCode(unit_code_obi1).Index(0);
+  switch_collection.SetSwitch(&switch4, 4);
+
+  static StickySwitchController<ObiSwitch> switch5;
+  switch5.Backend().UnitCode(unit_code_obi1).Index(1);
+  switch5.Toggle(true);
+  switch_collection.SetSwitch(&switch5, 5);
+
+  static StickySwitchController<ObiSwitch> switch6;
+  switch6.Backend().UnitCode(unit_code_obi1).Index(2);
+  switch6.Toggle(true);
+  switch_collection.SetSwitch(&switch6, 6);
 }
 
 
@@ -177,12 +194,12 @@ void setup() {
   pinMode(RF_EMITTER_PIN, OUTPUT);
   rc_switch.enableTransmit(RF_EMITTER_PIN);
 
-  initialize_switches(&rc_switch);
-
   Serial.begin(SERIAL_BAUD);
   Ethernet.begin(macAddress, ip);
   server.begin();
-  
+
+  initialize_switches(&rc_switch);
+
   logging::logTS();
   logging::log(F("Server listening at "));
   logging::logln(Ethernet.localIP());
