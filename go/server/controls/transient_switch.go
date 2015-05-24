@@ -2,7 +2,7 @@ package controls
 
 import (
 	"errors"
-	"fmt"
+	"github.com/DirtyHairy/arduino-butler/go/util/logging"
 	"sync"
 	"time"
 )
@@ -80,10 +80,10 @@ func (s *TransientSwitch) executeToggle(state bool) error {
 	s.state = state
 
 	if s.state == s.groundState {
-		fmt.Printf("switch '%s' reset to ground state, cancelling timer...\n", s.id)
+		logging.DebugLog.Printf("switch '%s' reset to ground state, cancelling timer...\n", s.id)
 		s.stopSignal()
 	} else {
-		fmt.Printf("switch '%s' excited, starting timer...\n", s.id)
+		logging.DebugLog.Printf("switch '%s' excited, starting timer...\n", s.id)
 		s.exciteTimestamp = time.Now()
 		s.scheduleSignal(s.timeout)
 	}
@@ -106,18 +106,18 @@ func (s *TransientSwitch) executeSignal() error {
 	switchBackPoint := s.exciteTimestamp.Add(s.timeout)
 
 	if now.Equal(switchBackPoint) || now.After(switchBackPoint) {
-		fmt.Printf("timeout exceeded, returning switch '%s' to ground state...\n", s.id)
+		logging.Log.Printf("timeout exceeded, returning switch '%s' to ground state...\n", s.id)
 
 		err := s.executeToggle(s.groundState)
 
 		if err != nil {
-			fmt.Printf("switch '%s': command failed, rescheduling...\n", s.id)
+			logging.ErrorLog.Printf("switch '%s': command failed, rescheduling...\n", s.id)
 			s.scheduleSignal(s.retry)
 		}
 
 		return err
 	} else {
-		fmt.Printf("switch '%s': clock skew, rescheduling...\n", s.id)
+		logging.ErrorLog.Printf("switch '%s': clock skew, rescheduling...\n", s.id)
 		s.scheduleSignal(switchBackPoint.Sub(now))
 	}
 
@@ -128,7 +128,7 @@ func (s *TransientSwitch) scheduleSignal(delay time.Duration) {
 	s.stopSignal()
 
 	s.timer = time.AfterFunc(delay, func() {
-		fmt.Printf("switch '%s': signaling...\n", s.id)
+		logging.DebugLog.Printf("switch '%s': signaling...\n", s.id)
 		s.runner.Dispatch(switchCommandSignal(0))
 	})
 }

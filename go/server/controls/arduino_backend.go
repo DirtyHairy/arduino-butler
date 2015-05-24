@@ -3,6 +3,7 @@ package controls
 import (
 	"fmt"
 	"github.com/DirtyHairy/arduino-butler/go/util"
+	"github.com/DirtyHairy/arduino-butler/go/util/logging"
 	"github.com/DirtyHairy/arduino-butler/go/util/runner"
 	"net/http"
 	"time"
@@ -36,7 +37,7 @@ func (backend *ArduinoBackend) execute(c interface{}) error {
 
 	url := fmt.Sprintf("http://%s/socket/%d/%s", backend.host, cmd.switchIdx, toggleCmd)
 
-	fmt.Printf("POSTing to %s\n", url)
+	logging.Log.Printf("POSTing to %s\n", url)
 	resp, err := backend.httpClient.Post(url, "application/text", util.EmptyReader)
 
 	if err == nil {

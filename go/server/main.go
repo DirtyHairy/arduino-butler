@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/DirtyHairy/arduino-butler/go/server/controls"
 	"github.com/DirtyHairy/arduino-butler/go/util/ip"
+	"github.com/DirtyHairy/arduino-butler/go/util/logging"
 	routerPkg "github.com/DirtyHairy/arduino-butler/go/util/router"
 	"github.com/googollee/go-socket.io"
 	"io/ioutil"
@@ -16,6 +17,8 @@ import (
 
 type configBag struct {
 	port         int
+	useSyslog    bool
+	logLevel     uint
 	ip           string
 	frontendPath string
 	configFile   string
@@ -26,6 +29,8 @@ func parseCommandline() configBag {
 		port:         8888,
 		frontendPath: "./frontend",
 		configFile:   "config.json",
+		useSyslog:    false,
+		logLevel:     logging.LOG_LEVEL_INFO,
 	}
 
 	ip := ip.Create()
@@ -34,6 +39,8 @@ func parseCommandline() configBag {
 	flag.IntVar(&config.port, "p", config.port, "server listen port")
 	flag.StringVar(&config.frontendPath, "f", config.frontendPath, "path to frontend")
 	flag.StringVar(&config.configFile, "c", config.configFile, "configuration file")
+	flag.BoolVar(&config.useSyslog, "s", config.useSyslog, "log to syslog")
+	flag.UintVar(&config.logLevel, "v", config.logLevel, "verbosity (0 - 3)")
 
 	flag.Parse()
 
@@ -73,27 +80,28 @@ func createSocketIoServer(eventChannel chan interface{}) (*socketio.Server, erro
 		return nil, err
 	}
 
-    server.On("connection", func(socket socketio.Socket) {
-        socket.Join("updates")
-    })
+	server.On("connection", func(socket socketio.Socket) {
+		socket.Join("updates")
+	})
 
 	go func() {
 		for {
 			evt, ok := <-eventChannel
 
 			if !ok {
-				panic("event channel closed!")
+				logging.ErrorLog.Println("event channel closed!")
+				os.Exit(1)
 			}
 
 			switch evt := evt.(type) {
 			case controls.SwitchUpdatedEvent:
 				swtch := evt.Switch()
 
-				fmt.Printf("sending update broadcast for switch '%s'\n", swtch.Id())
+				logging.DebugLog.Printf("sending update broadcast for switch '%s'\n", swtch.Id())
 				server.BroadcastTo("updates", "switchUpdate", swtch.Marshal())
 
 			default:
-				fmt.Println("invalid event type")
+				logging.ErrorLog.Println("invalid event type")
 			}
 		}
 	}()
@@ -101,17 +109,39 @@ func createSocketIoServer(eventChannel chan interface{}) (*socketio.Server, erro
 	return server, nil
 }
 
+func initLogging(useSyslog bool, logLevel uint) error {
+	var backend logging.LoggingBackend
+
+	if useSyslog {
+		var err error
+		if backend, err = logging.CreateSyslogBackend("arduino-butler"); err != nil {
+			return err
+		}
+	} else {
+		backend = logging.CreateStdioBackend("arduino-butler")
+	}
+
+	logging.Start(backend, logLevel)
+
+	return nil
+}
+
 func main() {
 	config := parseCommandline()
 
+	if err := initLogging(config.useSyslog, config.logLevel); err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	listenAddress := config.ip + ":" + strconv.Itoa(config.port)
 
-	fmt.Println("reading config...")
+	logging.DebugLog.Print("reading config...")
 
 	controlSet, err := createContrlSetFromConfigFile(config.configFile)
 
 	if err != nil {
-		fmt.Println(err)
+		logging.ErrorLog.Println(err)
 		return
 	}
 
@@ -123,7 +153,7 @@ func main() {
 
 	socketIoServer, err := createSocketIoServer(controlSet.GetEventChannel())
 	if err != nil {
-		fmt.Println(err)
+		logging.ErrorLog.Println(err)
 		return
 	}
 
@@ -131,16 +161,17 @@ func main() {
 	http.Handle("/api/", router)
 	http.Handle("/api/socket.io/", socketIoServer)
 
-	fmt.Printf("Frontend served from %s\n", config.frontendPath)
-	fmt.Printf("Server listening on %s\n", listenAddress)
+	logging.Log.Printf("Frontend served from %s\n", config.frontendPath)
+	logging.Log.Printf("Server listening on %s\n", listenAddress)
 
 	if err := controlSet.Start(); err != nil {
-		panic(fmt.Sprintf("failed to start controls: %v", err))
+		logging.ErrorLog.Printf("failed to start controls: %v", err)
+		return
 	}
 	defer controlSet.Stop()
 
 	if err := http.ListenAndServe(listenAddress, nil); err != nil {
-		fmt.Println(err)
+		logging.ErrorLog.Println(err)
 		os.Exit(1)
 	}
 }

@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/DirtyHairy/arduino-butler/go/server/controls"
+	"github.com/DirtyHairy/arduino-butler/go/util/logging"
 	"net/http"
 )
 
@@ -18,7 +18,7 @@ func CreateController(controlSet *controls.ControlSet) *Controller {
 }
 
 func (controller *Controller) HandleSwitch(response http.ResponseWriter, request *http.Request, matches []string) {
-	fmt.Printf("handling request for %s\n", matches[0])
+	logging.Log.Printf("handling switch request for %s\n", matches[0])
 
 	switchId := matches[1]
 	state := matches[2] == "on"
@@ -29,13 +29,13 @@ func (controller *Controller) HandleSwitch(response http.ResponseWriter, request
 	if swtch != nil {
 		err = swtch.Toggle(state)
 	} else {
-		fmt.Print("no such switch\n")
+		logging.ErrorLog.Print("no such switch\n")
 		response.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	if err != nil {
-		fmt.Printf("error: %v\n", err)
+		logging.ErrorLog.Printf("error: %v\n", err)
 	}
 
 	switch err.(type) {
