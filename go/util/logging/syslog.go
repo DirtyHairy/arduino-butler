@@ -28,21 +28,15 @@ func CreateSyslogBackend(prefix string) (*syslogBackend, error) {
 }
 
 func (backend *syslogBackend) ErrorWriter() io.Writer {
-	writer := syslog.Writer(*backend)
-
-	return printFuncWriter(writer.Err)
+	return printFuncWriter((*syslog.Writer)(backend).Err)
 }
 
 func (backend *syslogBackend) InfoWriter() io.Writer {
-	writer := syslog.Writer(*backend)
-
-	return printFuncWriter(writer.Info)
+	return printFuncWriter((*syslog.Writer)(backend).Info)
 }
 
 func (backend *syslogBackend) DebugWriter() io.Writer {
-	writer := syslog.Writer(*backend)
-
-	return printFuncWriter(writer.Debug)
+	return printFuncWriter((*syslog.Writer)(backend).Debug)
 }
 
 func (backend *syslogBackend) Prefix() string {
