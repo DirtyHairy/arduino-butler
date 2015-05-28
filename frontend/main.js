@@ -1,4 +1,5 @@
 angular.module('toggles', ['ui.bootstrap'])
+
     .factory("api-socket", function() {
 
         return io('', {
@@ -6,6 +7,7 @@ angular.module('toggles', ['ui.bootstrap'])
         });
 
     })
+
     .factory('utility', function() {
         return {
             parseDurationToMsec: function(duration) {
@@ -28,6 +30,7 @@ angular.module('toggles', ['ui.bootstrap'])
             }
         };
     })
+
     .factory('loader', ['$modal', function($modal) {
         var loader,
             locks = 0;
@@ -56,6 +59,7 @@ angular.module('toggles', ['ui.bootstrap'])
             }
         };
     }])
+
     .controller('switchController', ['$http', '$scope', 'api-socket', 'utility', 'loader',
         function($http, $scope, socket, utility, loader)
     {
@@ -238,5 +242,3 @@ angular.module('toggles', ['ui.bootstrap'])
             updateSwitches();
         });
     }]);
-
-

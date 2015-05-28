@@ -75,7 +75,7 @@ func (s *PlainSwitch) Marshal() MarshalledSwitch {
 		BackendIndex: s.backendIdx,
 		Name:         s.name,
 
-        Generation:   <-generationChannel,
+		Generation: <-generationChannel,
 	}
 }
 

@@ -177,10 +177,10 @@ func (s *TransientSwitch) Start() error {
 	return nil
 }
 
-func (s* TransientSwitch) Stop() error {
-    s.stopSignal()
+func (s *TransientSwitch) Stop() error {
+	s.stopSignal()
 
-    return s.PlainSwitch.Stop()
+	return s.PlainSwitch.Stop()
 }
 
 func (s *TransientSwitch) setEventChannel(eventChannel chan interface{}) {

@@ -1,2 +1,7 @@
 frontend/bower_components
 build
+
+frontend/.tmp
+frontend/all.min*
+frontend/index.html
+frontend/node_modules

@@ -10,13 +10,13 @@ import (
 	"regexp"
 	"strconv"
 	"sync"
-    "time"
+	"time"
 )
 
 type configBag struct {
-	port int
-	ip   string
-    delay time.Duration
+	port  int
+	ip    string
+	delay time.Duration
 }
 
 var switchRouteRx *regexp.Regexp
@@ -25,22 +25,22 @@ var mutex sync.Mutex
 
 func parseCommandline() configBag {
 	config := configBag{
-        port: 8000,
-        ip: "",
-        delay: 200 * time.Millisecond,
-    }
+		port:  8000,
+		ip:    "",
+		delay: 200 * time.Millisecond,
+	}
 
 	ip := ip.Create()
-    delay := util.DurationValue(config.delay)
+	delay := util.DurationValue(config.delay)
 
 	flag.Var(&ip, "i", "server listen IP")
-    flag.Var(&delay, "d", "request delay")
+	flag.Var(&delay, "d", "request delay")
 
 	flag.IntVar(&config.port, "p", 8000, "server listen port")
 	flag.Parse()
 
 	config.ip = ip.String()
-    config.delay = delay.Value()
+	config.delay = delay.Value()
 
 	return config
 }
@@ -75,7 +75,7 @@ func handleSwitch(response http.ResponseWriter, request *http.Request) {
 
 	socketIdx, _ := strconv.Atoi(matches[1])
 
-    time.Sleep(delay)
+	time.Sleep(delay)
 
 	fmt.Printf("Toggled socket %d %s\n", socketIdx, matches[2])
 
@@ -89,9 +89,9 @@ func init() {
 func main() {
 	config := parseCommandline()
 	listenAddress := config.ip + ":" + strconv.Itoa(config.port)
-    delay = config.delay
+	delay = config.delay
 
-    fmt.Printf("response delay: %v\n", delay)
+	fmt.Printf("response delay: %v\n", delay)
 	fmt.Printf("Server listening on %s...\n", listenAddress)
 	http.HandleFunc("/", handleSwitch)
 
