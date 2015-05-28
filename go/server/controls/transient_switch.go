@@ -30,7 +30,7 @@ type transientSwitchPublicVolatileState struct {
 	state           bool
 	exciteTimestamp time.Time
 
-	mutex sync.RWMutex
+	mutex sync.Mutex
 }
 
 func CreateTransientSwitch(backendIdx uint, groundState bool, timeout time.Duration) *TransientSwitch {
@@ -142,8 +142,8 @@ func (s *TransientSwitch) stopSignal() {
 
 func (s *TransientSwitch) Marshal() MarshalledSwitch {
 	publicState := &s.publicVolatileState
-	publicState.mutex.RLock()
-	defer publicState.mutex.RUnlock()
+	publicState.mutex.Lock()
+	defer publicState.mutex.Unlock()
 
 	m := s.PlainSwitch.Marshal()
 	m.allocateTransientSwitch()

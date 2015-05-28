@@ -1,0 +1,30 @@
+button:active, button:focus {
+    outline: none !important;
+}
+
+.state-label {
+    line-height: inherit;
+    display: inline-block;
+    min-width: 8ex;
+}
+
+.progress-col.ng-hide {
+    visibility: hidden;
+    display: inline-block !important;
+}
+
+.progress-bar {
+    min-width: 4ex
+}
+
+.loading-modal .modal-dialog {
+    display: none
+}
+
+.loading-modal-backdrop {
+    background-image: url("resources/loader.svg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: rgba(0, 0, 0, 0.3);
+    opacity: 1 !important;
+}

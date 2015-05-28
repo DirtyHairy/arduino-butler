@@ -3,35 +3,16 @@
 <head>
     <title>Toggles</title>
     <script src="bower_components/angular/angular.min.js"></script>
-    <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
     <script src="bower_components/socket.io-client/socket.io.js"></script>
     <script src="bower_components/moment/min/moment.min.js"></script>
+    <script src="main.js"></script>
 
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="style.css"/>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <style>
-        button:active, button:focus {
-            outline: none !important;
-        }
-
-        .state-label {
-            line-height: inherit;
-            display: inline-block;
-            min-width: 8ex;
-        }
-
-        .progress-col.ng-hide {
-            visibility: hidden;
-            display: inline-block !important;
-        }
-
-        .progress-bar {
-            min-width: 4ex
-        }
-    </style>
 </head>
 
 <body ng-app="toggles" ng-controller="switchController as controller">
@@ -61,147 +42,6 @@
         </div>
         </p>
     </div>
-    <script>
-
-angular.module('toggles', ['ui.bootstrap'])
-    .factory("api-socket", function() {
-
-        return io('', {
-            path: '/api/socket.io'
-        });
-
-    })
-    .factory('utility', function() {
-        return {
-            parseDurationToMsec: function(duration) {
-                var msec = 0,
-                    multiplicators = {
-                        ms: 1,
-                        s: 1000,
-                        m: 60000,
-                        h: 3600000
-                    },
-                    matches;
-
-                while (matches = duration.match(/^\s*(\d+)\s*(s|m|h|ms|us|ns)/)) {
-                    msec += (parseInt(matches[1], 10) * (multiplicators[matches[2]] || 0));
-
-                    duration = duration.replace(/^\s*\d+\s*(s|m|h|ms|us|ns)/, '');
-                }
-
-                return msec;
-            }
-        };
-    })
-    .controller('switchController', ['$http', '$scope', 'api-socket', 'utility',
-        function($http, $scope, socket, utility)
-    {
-        var switchesById = {},
-            intervalHandle = null;
-
-        function createSwitch(dataset) {
-            dataset.remaining = function() {
-                var duration = moment.duration(this.millisecondsRemaining > 1000 ? this.millisecondsRemaining : 1000),
-                    seconds = duration.seconds(),
-                    minutes = duration.minutes(),
-                    hours = duration.hours(),
-                    days = duration.days();
-
-                var result = '';
-
-                if (days > 0) result += (days + 'd ');
-                if (hours > 0) result += (hours + 'h ');
-                if (minutes > 0) result += (minutes + 'm ');
-                if (seconds > 0) result += (seconds + 's ');
-
-                return result.replace(/\s* $/, '');
-            };
-
-            if (dataset.type === 'transient') dataset.parsedTimeout = utility.parseDurationToMsec(dataset.timeout);
-
-            dataset.updateTimeoutTimestamp = Date.now();
-
-            return dataset;
-        }
-
-        function updateSwitch(swtch, dataset) {
-            for (key in dataset) {
-                if (!dataset.hasOwnProperty(key)) continue;
-
-                swtch[key] = dataset[key];
-            }
-
-            if (swtch.type === 'transient') swtch.parsedTimeout = utility.parseDurationToMsec(swtch.timeout);
-
-            swtch.updateTimeoutTimestamp = Date.now();
-        }
-
-        function intervalHandler() {
-            $scope.$apply(function() {
-                $scope.switches.forEach(function(swtch) {
-                    if (swtch.type === 'transient' && swtch.state !== swtch.groundState) {
-                        var now = Date.now();
-
-                        swtch.millisecondsRemaining -= (now - swtch.updateTimeoutTimestamp);
-                        swtch.updateTimeoutTimestamp = now;
-                    }
-                });
-            });
-        }
-
-        function startOrStopInterval() {
-            var required = false;
-
-            if ($scope.switches) {
-                $scope.switches.forEach(function(swtch) {
-                    if (swtch.type === 'transient' && swtch.state !== swtch.groundState) required = true;
-                });
-            }
-
-            if (required) {
-                if (intervalHandle === null) intervalHandle = setInterval(intervalHandler, 1000);
-            } else {
-                if (intervalHandle !== null) {
-                    clearInterval(intervalHandle);
-                    intervalHandle = null
-                }
-            }
-        }
-
-        $http.get('/api/structure').then(function(response) {
-            if (!response.status == 200) return;
-
-            $scope.switches = [];
-
-            response.data.switches.forEach(function(dataset) {
-                var swtch = createSwitch(dataset);
-
-                $scope.switches.push(swtch);
-
-                switchesById[swtch.id] = swtch;
-            });
-
-            startOrStopInterval();
-        });
-
-        socket.on('switchUpdate', function(dataset) {
-            var swtch = switchesById[dataset.id];
-
-            if (!swtch) return;
-
-            $scope.$apply(function() {
-                updateSwitch(swtch, dataset);
-            });
-
-            startOrStopInterval();
-        });
-
-        this.toggle = function(id, state) {
-            $http.post('/api/switch/' + id + '/' + (state ? 'on' : 'off'), '');
-        };
-    }]);
-
-    </script>
 </body>
 
 </html>

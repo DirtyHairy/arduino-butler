@@ -18,6 +18,8 @@ type MarshalledSwitch struct {
 	BackendId    string `json:"backendId"`
 	BackendIndex uint   `json:"backendIndex"`
 
+    Generation uint32 `json:"generation"`
+
 	GroundState *bool   `json:"groundState,omitempty"`
 	Timeout     *string `json:"timeout,omitempty"`
 
