@@ -28,7 +28,3 @@ button:active, button:focus {
     background-color: rgba(0, 0, 0, 0.3);
     opacity: 1 !important;
 }
-
-body {
-    overflow-y: auto !important;
-}
