@@ -28,6 +28,9 @@
 #include "switch_backend.h"
 #include "logging.h"
 
+namespace {
+  const PROGMEM char unit_codes[][8] = {"00FFFFF","0FFF0FF"};
+}
 
 RCSwitch* CustomSwitch1::rc_switch = NULL;
 
@@ -95,7 +98,7 @@ void ObiSwitch::SetRCSwitch(RCSwitch* rc_switch) {
 }
 
 
-ObiSwitch::ObiSwitch() : index(0), unit_code(0) {}
+ObiSwitch::ObiSwitch() : index(0), unit_code(UNIT_CODE_1403) {}
 
 
 bool ObiSwitch::Toggle(bool state) {
@@ -106,7 +109,7 @@ bool ObiSwitch::Toggle(bool state) {
 
   char code[13] = "0000000F0000";
 
-  memcpy_P(code, unit_code, 7);
+  memcpy_P(code, unit_codes[unit_code], 7);
 
   code[9 - index] = '1';
   
@@ -130,8 +133,8 @@ ObiSwitch& ObiSwitch::Index(uint8_t index) {
 }
 
 
-ObiSwitch& ObiSwitch::UnitCode(const PROGMEM char* unit_code) {
-  this->unit_code = unit_code;
+ObiSwitch& ObiSwitch::UnitCode(UnitCodeT unit_code) {
+  if (unit_code <= UNIT_CODE_1417) this->unit_code = unit_code;
 
   return *this;
 }

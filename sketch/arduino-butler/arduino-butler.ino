@@ -31,6 +31,7 @@
 #include <Ethernet.h>
 #include <EthernetServer.h>
 #include <string.h>
+#include <MemoryFree.h>
 
 #include "http_parser.h"
 #include "url_parser.h"
@@ -44,43 +45,53 @@
 #include "switch_controller.h"
 
 EthernetServer server(SERVER_PORT);
-SwitchCollection<7> switch_collection;
+SwitchCollection<10> switch_collection;
 
 void initialize_switches(RCSwitch* rc_switch) {
-  const PROGMEM char* unit_code_obi1 = PSTR("00FFFFF");
-
   CustomSwitch1::SetRCSwitch(rc_switch);
   ObiSwitch::SetRCSwitch(rc_switch);
 
-  static PlainSwitchController<CustomSwitch1> switch0;
-  switch0.Backend().Index(0);
-  switch_collection.SetSwitch(&switch0, 0);
+  PlainSwitchController<CustomSwitch1>* switch0 = new PlainSwitchController<CustomSwitch1>();
+  switch0->Backend().Index(0);
+  switch_collection.SetSwitch(switch0, 0);
 
-  static PlainSwitchController<CustomSwitch1> switch1;
-  switch1.Backend().Index(1);
-  switch_collection.SetSwitch(&switch1, 1);
+  PlainSwitchController<CustomSwitch1>* switch1 = new PlainSwitchController<CustomSwitch1>();
+  switch1->Backend().Index(1);
+  switch_collection.SetSwitch(switch1, 1);
 
-  static PlainSwitchController<CustomSwitch1> switch2;
-  switch2.Backend().Index(2);
-  switch_collection.SetSwitch(&switch2, 2);
+  PlainSwitchController<CustomSwitch1>* switch2 = new PlainSwitchController<CustomSwitch1>();
+  switch2->Backend().Index(2);
+  switch_collection.SetSwitch(switch2, 2);
 
-  static PlainSwitchController<CustomSwitch1> switch3;
-  switch3.Backend().Index(3);
-  switch_collection.SetSwitch(&switch3, 3);
+  PlainSwitchController<CustomSwitch1>* switch3 = new PlainSwitchController<CustomSwitch1>();
+  switch3->Backend().Index(3);
+  switch_collection.SetSwitch(switch3, 3);
 
-  static StickySwitchController<ObiSwitch> switch4;
-  switch4.Backend().UnitCode(unit_code_obi1).Index(0);
-  switch_collection.SetSwitch(&switch4, 4);
+  StickySwitchController<ObiSwitch>* switch4 = new StickySwitchController<ObiSwitch>();
+  switch4->Backend().UnitCode(ObiSwitch::UNIT_CODE_1403).Index(0);
+  switch_collection.SetSwitch(switch4, 4);
 
-  static StickySwitchController<ObiSwitch> switch5;
-  switch5.Backend().UnitCode(unit_code_obi1).Index(1);
-  switch5.Toggle(true);
-  switch_collection.SetSwitch(&switch5, 5);
+  StickySwitchController<ObiSwitch>* switch5 = new StickySwitchController<ObiSwitch>();
+  switch5->Backend().UnitCode(ObiSwitch::UNIT_CODE_1403).Index(1);
+  switch5->Toggle(true);
+  switch_collection.SetSwitch(switch5, 5);
 
-  static StickySwitchController<ObiSwitch> switch6;
-  switch6.Backend().UnitCode(unit_code_obi1).Index(2);
-  switch6.Toggle(true);
-  switch_collection.SetSwitch(&switch6, 6);
+  StickySwitchController<ObiSwitch> *switch6 = new StickySwitchController<ObiSwitch>();
+  switch6->Backend().UnitCode(ObiSwitch::UNIT_CODE_1403).Index(2);
+  switch6->Toggle(true);
+  switch_collection.SetSwitch(switch6, 6);
+
+  StickySwitchController<ObiSwitch> *switch7 = new StickySwitchController<ObiSwitch>();
+  switch7->Backend().UnitCode(ObiSwitch::UNIT_CODE_1417).Index(0);
+  switch_collection.SetSwitch(switch7, 7);
+
+  PlainSwitchController<ObiSwitch> *switch8 = new PlainSwitchController<ObiSwitch>();
+  switch8->Backend().UnitCode(ObiSwitch::UNIT_CODE_1417).Index(1);
+  switch_collection.SetSwitch(switch8, 8);
+
+  PlainSwitchController<ObiSwitch> *switch9 = new PlainSwitchController<ObiSwitch>();
+  switch9->Backend().UnitCode(ObiSwitch::UNIT_CODE_1417).Index(2);
+  switch_collection.SetSwitch(switch9, 9);
 }
 
 
@@ -179,7 +190,7 @@ void send_response(Response& response, EthernetClient& client) {
 }
 
 
-void setup() {
+void doSetup() {
   byte macAddress[] = {MAC_ADDRESS};
   IPAddress ip(IP_ADDRESS);
 
@@ -189,16 +200,25 @@ void setup() {
   digitalWrite(4, HIGH);
   digitalWrite(10, LOW);
  
-  static RCSwitch rc_switch;
+  RCSwitch *rc_switch = new RCSwitch();
 
   pinMode(RF_EMITTER_PIN, OUTPUT);
-  rc_switch.enableTransmit(RF_EMITTER_PIN);
+  rc_switch->enableTransmit(RF_EMITTER_PIN);
+  rc_switch->setRepeatTransmit(15);
 
   Serial.begin(SERIAL_BAUD);
   Ethernet.begin(macAddress, ip);
   server.begin();
 
-  initialize_switches(&rc_switch);
+  initialize_switches(rc_switch);
+}
+
+void setup() {
+  doSetup();
+
+  logging::logTS();
+  logging::log(F("Free memory after init: "));
+  logging::logln(freeMemory());
 
   logging::logTS();
   logging::log(F("Server listening at "));

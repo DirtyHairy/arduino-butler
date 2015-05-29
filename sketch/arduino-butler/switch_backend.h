@@ -59,6 +59,11 @@ class CustomSwitch1 {
 class ObiSwitch {
   public:
 
+    enum  UnitCodeT {
+      UNIT_CODE_1403 = 0,
+      UNIT_CODE_1417 = 1
+    };
+
     static void SetRCSwitch(RCSwitch* rc_switch);
 
     ObiSwitch();
@@ -67,7 +72,7 @@ class ObiSwitch {
 
     ObiSwitch& Index(uint8_t index);
 
-    ObiSwitch& UnitCode(const PROGMEM char* unit_code);
+    ObiSwitch& UnitCode(UnitCodeT unit_code);
 
   private:
 
@@ -79,7 +84,7 @@ class ObiSwitch {
 
     uint8_t index;
 
-    const PROGMEM char* unit_code;
+    uint8_t unit_code;
 };
 
 
