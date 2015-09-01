@@ -67,7 +67,7 @@ void initialize_switches(RCSwitch* rc_switch) {
   switch3->Backend().Index(3);
   switch_collection.SetSwitch(switch3, 3);
 
-  StickySwitchController<ObiSwitch>* switch4 = new StickySwitchController<ObiSwitch>();
+  PlainSwitchController<ObiSwitch>* switch4 = new PlainSwitchController<ObiSwitch>();
   switch4->Backend().UnitCode(ObiSwitch::UNIT_CODE_1403).Index(0);
   switch_collection.SetSwitch(switch4, 4);
 
@@ -89,7 +89,7 @@ void initialize_switches(RCSwitch* rc_switch) {
   switch8->Backend().UnitCode(ObiSwitch::UNIT_CODE_1417).Index(1);
   switch_collection.SetSwitch(switch8, 8);
 
-  PlainSwitchController<ObiSwitch> *switch9 = new PlainSwitchController<ObiSwitch>();
+  StickySwitchController<ObiSwitch> *switch9 = new StickySwitchController<ObiSwitch>();
   switch9->Backend().UnitCode(ObiSwitch::UNIT_CODE_1417).Index(2);
   switch_collection.SetSwitch(switch9, 9);
 }

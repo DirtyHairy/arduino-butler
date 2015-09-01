@@ -40,7 +40,7 @@
 
 #define SERIAL_BAUD 115200
 #define MAC_ADDRESS 0x00, 0x16, 0x3E, 0x54, 0x5E, 0xA1
-#define IP_ADDRESS 192, 168, 1, 10
+#define IP_ADDRESS 192, 168, 2, 10
 #define SERVER_PORT 80
 
 #define RF_EMITTER_PIN 5
