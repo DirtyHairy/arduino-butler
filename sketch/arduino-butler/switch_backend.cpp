@@ -35,7 +35,7 @@ namespace {
 RCSwitch* CustomSwitch1::rc_switch = NULL;
 
 
-CustomSwitch1::CustomSwitch1() : index(0) {}
+CustomSwitch1::CustomSwitch1() : index(0), modcode(0) {}
 
 
 void CustomSwitch1::SetRCSwitch(RCSwitch* rc_switch) {
@@ -49,15 +49,26 @@ CustomSwitch1& CustomSwitch1::Index(uint8_t index) {
   return *this;
 }
 
+CustomSwitch1& CustomSwitch1::Modcode(uint8_t modcode) {
+  this->modcode = modcode;
+
+  return *this;
+}
 
 bool CustomSwitch1::Toggle(bool state) {
   logging::logTS();
   logging::log(F("Toggle custom switch "));
   logging::log(index);
+  logging::log(", modcode ");
+  logging::log(modcode);
   logging::logln(state ? F(" on") : F(" off"));
 
   char code[14];
   strcpy_P(code, PSTR("000FFFF0FFFFS"));
+
+  for (uint8_t i = 0; i < 3; i++) {
+    if (modcode & (1 << i)) code[i] = 'F';
+  }
 
   switch (index) {
     case 3:

@@ -44,6 +44,8 @@ class CustomSwitch1 {
 
     CustomSwitch1& Index(uint8_t index);
 
+    CustomSwitch1& Modcode(uint8_t modcode);
+
   private:
 
     CustomSwitch1(CustomSwitch1&);
@@ -52,7 +54,7 @@ class CustomSwitch1 {
 
     static RCSwitch* rc_switch;
 
-    uint8_t index;
+    uint8_t index, modcode;
 };
 
 

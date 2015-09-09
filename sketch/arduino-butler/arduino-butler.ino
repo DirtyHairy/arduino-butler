@@ -45,7 +45,7 @@
 #include "switch_controller.h"
 
 EthernetServer server(SERVER_PORT);
-SwitchCollection<10> switch_collection;
+SwitchCollection<11> switch_collection;
 
 void initialize_switches(RCSwitch* rc_switch) {
   CustomSwitch1::SetRCSwitch(rc_switch);
@@ -92,6 +92,10 @@ void initialize_switches(RCSwitch* rc_switch) {
   StickySwitchController<ObiSwitch> *switch9 = new StickySwitchController<ObiSwitch>();
   switch9->Backend().UnitCode(ObiSwitch::UNIT_CODE_1417).Index(2);
   switch_collection.SetSwitch(switch9, 9);
+
+  PlainSwitchController<CustomSwitch1>* switch10 = new PlainSwitchController<CustomSwitch1>();
+  switch10->Backend().Index(0).Modcode(1);
+  switch_collection.SetSwitch(switch10, 10);
 }
 
 
@@ -112,13 +116,13 @@ Response& handle_request(HttpParser& parser) {
  
   if (!url_parser.NextPathElement(buffer, URL_PARSE_BUFFER_SIZE)) return response_not_found;
   if (strlen(buffer) > 2 ) return response_not_found;
-  
+
   unsigned int switch_index;
   if (sscanf(buffer, "%u", &switch_index) != 1) return response_not_found;
- 
+
   if (!url_parser.NextPathElement(buffer, URL_PARSE_BUFFER_SIZE)) return response_not_found;
   if (!url_parser.AtEnd()) return response_not_found;
-  
+
   if (strcmp_P(buffer, PSTR("on")) == 0) {
     if (!switch_collection.Toggle(switch_index, true)) return response_not_found;
 
