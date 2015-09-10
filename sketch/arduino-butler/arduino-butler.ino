@@ -45,7 +45,7 @@
 #include "switch_controller.h"
 
 EthernetServer server(SERVER_PORT);
-SwitchCollection<11> switch_collection;
+SwitchCollection<15> switch_collection;
 
 void initialize_switches(RCSwitch* rc_switch) {
   CustomSwitch1::SetRCSwitch(rc_switch);
@@ -96,6 +96,22 @@ void initialize_switches(RCSwitch* rc_switch) {
   PlainSwitchController<CustomSwitch1>* switch10 = new PlainSwitchController<CustomSwitch1>();
   switch10->Backend().Index(0).Modcode(1);
   switch_collection.SetSwitch(switch10, 10);
+
+  PlainSwitchController<CustomSwitch1>* switch11 = new PlainSwitchController<CustomSwitch1>();
+  switch11->Backend().Index(1).Modcode(1);
+  switch_collection.SetSwitch(switch11, 11);
+
+  PlainSwitchController<CustomSwitch1>* switch12 = new PlainSwitchController<CustomSwitch1>();
+  switch12->Backend().Index(2).Modcode(1);
+  switch_collection.SetSwitch(switch12, 12);
+
+  PlainSwitchController<CustomSwitch1>* switch13 = new PlainSwitchController<CustomSwitch1>();
+  switch13->Backend().Index(3).Modcode(1);
+  switch_collection.SetSwitch(switch13, 13);
+
+  PlainSwitchController<CustomSwitch1>* switch14 = new PlainSwitchController<CustomSwitch1>();
+  switch14->Backend().Index(0).Modcode(2);
+  switch_collection.SetSwitch(switch14, 14);
 }
 
 
