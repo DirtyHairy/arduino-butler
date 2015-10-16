@@ -1,0 +1,12 @@
+#!/sbin/runscript
+
+pidfile="/var/run/arduino-butler.pid"
+command="${SERVER_BINARY}"
+command_args="-f ${FRONTEND_DIR} -c ${SERVER_CONFIG} -s ${SERVER_ARGS}"
+start_stop_daemon_args="-p ${pidfile} -m -u ${SERVER_USER}:${SERVER_GROUP} -b -w 100"
+
+depend() {
+	need localmount net nginx
+	after bootmisc
+	use logger
+}
