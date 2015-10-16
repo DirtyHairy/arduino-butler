@@ -63,8 +63,6 @@ angular.module('toggles', ['ui.bootstrap'])
         return {
             show: function() {
                 if (locks++ === 0) {
-                    console.log('Locking');
-
                     loader = $modal.open({
                         template: " ",
                         backdrop: "static",
@@ -77,8 +75,6 @@ angular.module('toggles', ['ui.bootstrap'])
 
             hide: function() {
                 if (--locks === 0) {
-                        console.log('unlocking');
-
                         loader.close();
                 }
             }
@@ -172,8 +168,6 @@ angular.module('toggles', ['ui.bootstrap'])
         function initializeSwitches() {
             loader.show();
 
-            console.log('loading structure');
-
             $http.get('/api/structure').then(function(response) {
                 if (response.status !== 200) setTimeout(function() {
                     loader.hide();
@@ -202,8 +196,6 @@ angular.module('toggles', ['ui.bootstrap'])
         function updateSwitches() {
             loader.show();
 
-            console.log('updating structure');
-
             $http.get('/api/structure').then(function(response) {
                 if (response.status !== 200) setTimeout(function() {
                     loader.hide();
@@ -224,7 +216,7 @@ angular.module('toggles', ['ui.bootstrap'])
             loader.show();
 
             $http.post('/api/switch/' + id + '/' + (state ? 'on' : 'off'), '')
-                .finally(function() {
+                ['finally'](function() {
                     loader.hide();
                 });
         };
@@ -232,8 +224,6 @@ angular.module('toggles', ['ui.bootstrap'])
         loader.show();
 
         socket.on('connect', function() {
-            console.log('connect');
-
             if ($scope.switches) return;
 
             loader.hide();
@@ -241,8 +231,6 @@ angular.module('toggles', ['ui.bootstrap'])
         });
 
         socket.on('switchUpdate', function(dataset) {
-            console.log('switch update received');
-
             if ($scope.switches) {
                 $scope.$apply(function() {
                     updateSwitch(dataset);
@@ -255,14 +243,10 @@ angular.module('toggles', ['ui.bootstrap'])
         });
 
         socket.on('disconnect', function() {
-            console.log('disconnect');
-
             loader.show();
         });
 
         socket.on('reconnect', function() {
-            console.log('reconnect');
-
             loader.hide();
             updateSwitches();
         });
