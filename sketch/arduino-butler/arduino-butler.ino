@@ -105,8 +105,9 @@ void initialize_switches(RCSwitch* rc_switch) {
   switch12->Backend().Index(2).Modcode(1);
   switch_collection.SetSwitch(switch12, 12);
 
-  PlainSwitchController<CustomSwitch1>* switch13 = new PlainSwitchController<CustomSwitch1>();
+  StickySwitchController<CustomSwitch1>* switch13 = new StickySwitchController<CustomSwitch1>();
   switch13->Backend().Index(3).Modcode(1);
+  switch13->Toggle(true);
   switch_collection.SetSwitch(switch13, 13);
 
   PlainSwitchController<CustomSwitch1>* switch14 = new PlainSwitchController<CustomSwitch1>();
