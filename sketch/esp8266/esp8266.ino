@@ -29,7 +29,8 @@ void handshake() {
     }
 
     handshake_complete:
-    Serial.println(F("ready"));
+        delay(100);
+        Serial.println(F("ready"));
 }
 
 void setup() {
