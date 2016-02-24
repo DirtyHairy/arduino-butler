@@ -30,6 +30,7 @@ GO_PACKAGE_PREFIX = github.com/DirtyHairy/arduino-butler
 GO_PACKAGES = \
 	go/butler-server \
 	go/butler-server/controls \
+	go/esp8266-debug \
 	go/mockduino \
 	go/util \
 	go/util/ip \
@@ -39,7 +40,8 @@ GO_PACKAGES = \
 	go/util/logging
 GO_DEPENDENCIES = \
 	github.com/davecgh/go-spew/spew \
-	github.com/googollee/go-socket.io
+	github.com/googollee/go-socket.io \
+	github.com/tarm/serial
 
 GO_DEBUG_MAIN = github.com/DirtyHairy/arduino-butler/go/butler-server
 GO_DEBUG_BINARY = ./butler-server.debug

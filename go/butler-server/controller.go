@@ -27,7 +27,7 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/DirtyHairy/arduino-butler/go/server/controls"
+	"github.com/DirtyHairy/arduino-butler/go/butler-server/controls"
 	"github.com/DirtyHairy/arduino-butler/go/util/logging"
 	"net/http"
 )
