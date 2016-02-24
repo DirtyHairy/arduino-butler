@@ -5,10 +5,15 @@ void handshake() {
     char buffer[20];
     uint8_t i;
 
+    do {
+        delay(10);
+    } while (Serial.read() >= 0);
+
     while (true) {
-        Serial.println(F("waiting"));
-        
-        while (abs(millis() - timestamp) < 1000) {
+        Serial.print(F("waiting"));
+        Serial.write(0x0A);
+
+        while (abs(millis() - timestamp) < 500) {
             yield();
             int invalue = Serial.read();
 
@@ -30,7 +35,8 @@ void handshake() {
 
     handshake_complete:
         delay(100);
-        Serial.println(F("ready"));
+        Serial.print(F("ready"));
+        Serial.write(0x0A);
 }
 
 void setup() {
