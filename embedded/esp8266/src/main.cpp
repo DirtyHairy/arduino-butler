@@ -14,7 +14,7 @@ void handshake() {
         Serial.print(F("waiting"));
         Serial.write(0x0A);
 
-        while (abs(millis() - timestamp) < 500) {
+        while (abs(millis() - timestamp) < 1000) {
             yield();
             int invalue = Serial.read();
 
@@ -42,10 +42,17 @@ void handshake() {
 
 void setup() {
     Serial.begin(115200);
+    Serial1.begin(57600);
+
+    Serial1.println();
+    Serial1.println(F("init complete"));
 }
 
 void loop() {
+    Serial1.println(F("waiting for handshake"));
     handshake();
+
+    Serial1.println(F("handshake complete"));
 
     while (true) {
         yield();
