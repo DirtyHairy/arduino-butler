@@ -5,3 +5,5 @@ frontend/.tmp
 frontend/all.min*
 frontend/index.html
 frontend/node_modules
+
+.clang_complete
