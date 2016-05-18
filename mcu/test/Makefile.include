@@ -1,0 +1,36 @@
+BASEPATH ?= .
+
+include $(BASEPATH)/Makefile.local
+
+HOST_CC ?= gcc
+CFLAGS ?= -O0 -g
+
+SIMAVR_PREFIX ?= $$HOME
+
+AVR_CC ?= avr-gcc
+AVR_CPP ?= avr-g++
+AVR_AR ?= avr-ar
+AVR_RANLIB ?= avr-ranlib
+
+AVR_CFLAGS ?= -Os -g
+AVR_CPPFLAGS ?= $(AVR_CFLAGS)
+
+ARDUINO_PATH ?= $(HOME)/bin/arduino-current/hardware/arduino/avr
+ARDUINO_CORE_PATH ?= $(ARDUINO_PATH)/cores/arduino
+ARDUINO_VARIANTS_PATH ?= $(ARDUINO_PATH)/variants/standard
+
+testlib_dir = $(BASEPATH)/lib
+testlib = libtest-avr.a
+
+runner_dir = $(BASEPATH)/runner
+runner = runner
+
+avr_cflags_common = -ffunction-sections -fdata-sections -mmcu=atmega328p \
+	-DF_CPU=16000000L -DARDUINO=10605 -DARDUINO_AVR_UNO -DARDUINO_ARCH_AVR \
+	-I$(ARDUINO_CORE_PATH) -I$(ARDUINO_VARIANTS_PATH)
+avr_cflags = $(AVR_CFLAGS) $(avr_cflags_common)
+avr_cppflags = $(AVR_CPPFLAGS) $(avr_cflags_common) -fno-exceptions -fno-rtti -fno-threadsafe-statics
+avr_test_ldflags = -mmcu=atmega328p -L$(BASEPATH)/lib/ -ltest-avr
+
+ldflags = `PKG_CONFIG_PATH="$(SIMAVR_PREFIX)/lib/pkgconfig" pkg-config --libs simavr`
+cflags = -I$(SIMAVR_PREFIX)/include $(CFLAGS)

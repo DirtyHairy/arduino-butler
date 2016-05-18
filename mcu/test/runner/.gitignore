@@ -1,2 +1,1 @@
-*.o
-Makefile.local
+runner

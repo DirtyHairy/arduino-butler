@@ -1,30 +1,24 @@
-include Makefile.local
+BASEPATH = ..
+include $(BASEPATH)/Makefile.include
 
-BINARY = runner
-SOURCE = runner.c
-SIMAVR_PREFIX ?= $$HOME
-CFLAGS ?= -O0 -g
-LDFLAGS ?=
-CC ?= gcc
-
-objects = $(SOURCE:.c=.o)
-cflags = $(CFLAGS)
-ldflags = `PKG_CONFIG_PATH="$(SIMAVR_PREFIX)/lib/pkgconfig" pkg-config --libs simavr`
+binary = $(runner)
+source = runner.c
+objects = $(source:.c=.o)
 
 all: bin
 
-bin: $(BINARY)
+bin: $(binary)
 
-$(BINARY): $(objects)
-	gcc $(ldflags) -o $@ $<
+$(binary): $(objects)
+	$(HOST_CC) $< $(ldflags) -o $@
 
 $(objects): %.o : %.c
-	gcc -c $(cflags) -I$(SIMAVR_PREFIX)/include -o $@ $<
+	$(HOST_CC) -c $(cflags) -o $@ $<
 
-Makefile.local:
+$(BASEPATH)/Makefile.local:
 	touch $@
 
 clean:
-	-rm -f $(objects) $(BINARY) Makefile.local
+	-rm -f $(objects) $(binary)
 
 .PHONY: all bin clean

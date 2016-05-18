@@ -7,3 +7,5 @@ frontend/index.html
 frontend/node_modules
 
 .clang_complete
+
+Makefile.local
